@@ -1,0 +1,31 @@
+{
+  "name": "pc-usage-statistics",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-opener": "^2",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "^7.0.0",
+    "@tailwindcss/vite": "^4.1.12",
+    "@tauri-apps/cli": "^2",
+    "@types/node": "^24.3.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "chart.js": "^4.5.0",
+    "echarts": "^6.0.0",
+    "tailwindcss": "^4.1.12",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.3",
+    "vue-router": "4",
+    "vue-tsc": "^2.1.10"
+  }
+}
