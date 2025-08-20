@@ -1,88 +1,3 @@
-<template>
-  <div class="h-full p-6 animate-fade">
-    <!-- 概览卡片 -->
-    <div class="grid grid-cols-3 gap-6 mb-6">
-      <div class="bg-dark-200 text-light-300 rounded-xl p-5 card-shadow hover-lift">
-        <div class="flex justify-between items-start mb-4">
-          <div class="">
-            <p class="text-sm">今日使用时长</p>
-            <h3 class="text-2xl font-bold mt-1">5h 32m</h3>
-          </div>
-          <div class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
-            <i class="fa fa-clock text-current"></i>
-          </div>
-        </div>
-        <div class="flex items-center text-sm">
-          <span class="text-secondary flex items-center">
-            <i class="fa fa-arrow-up mr-1"></i> 12%
-          </span>
-          <span class="ml-2">较昨日</span>
-        </div>
-      </div>
-      
-      <div class="bg-dark-200 text-light-300 rounded-xl p-5 card-shadow hover-lift">
-        <div class="flex justify-between items-start mb-4">
-          <div>
-            <p class="text-sm">打开应用数</p>
-            <h3 class="text-2xl font-bold mt-1">18</h3>
-          </div>
-          <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400">
-            <i class="fa fa-th-large text-current"></i>
-          </div>
-        </div>
-        <div class="flex items-center text-sm">
-          <span class="text-secondary flex items-center">
-            <i class="fa fa-arrow-up mr-1"></i> 3
-          </span>
-          <span class="ml-2">较昨日</span>
-        </div>
-      </div>
-      
-      <div class="bg-dark-200 text-light-300 rounded-xl p-5 card-shadow hover-lift">
-        <div class="flex justify-between items-start mb-4">
-          <div>
-            <p class="text-sm">productive 时间</p>
-            <h3 class="text-2xl font-bold mt-1">3h 15m</h3>
-          </div>
-          <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400">
-            <i class="fa fa-check-circle"></i>
-          </div>
-        </div>
-        <div class="flex items-center text-sm">
-          <span class="text-red-400 flex items-center">
-            <i class="fa fa-arrow-down mr-1"></i> 5%
-          </span>
-          <span class="ml-2">较昨日</span>
-        </div>
-      </div>
-    </div>
-    
-    <!-- 图表区域 -->
-    <div class="grid grid-cols-3 gap-6 h-[calc(100%-12rem)] text-light-300">
-      <div class="bg-dark-200 rounded-xl p-5 card-shadow col-span-2 flex flex-col">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-semibold">每日使用时长</h3>
-          <div class="flex space-x-2">
-            <button class="px-2 py-1 text-xs rounded bg-dark-100 hover:bg-dark-100/70 transition-colors cursor-pointer">周</button>
-            <button class="px-2 py-1 text-xs rounded bg-primary/20 text-primary cursor-pointer">月</button>
-            <button class="px-2 py-1 text-xs rounded bg-dark-100 hover:bg-dark-100/70 transition-colors cursor-pointer">年</button>
-          </div>
-        </div>
-        <div class="flex-1 flex items-center justify-center">
-          <canvas id="dailyUsageChart" class="w-full h-full"></canvas>
-        </div>
-      </div>
-      
-      <div class="bg-dark-200 rounded-xl p-5 card-shadow flex flex-col">
-        <h3 class="font-semibold mb-4">应用使用占比</h3>
-        <div class="flex-1 flex items-center justify-center">
-          <canvas id="appUsageChart" class="w-full h-full max-w-[200px] max-h-[200px]"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { onMounted, onUnmounted } from 'vue';
 import { Chart, registerables } from 'chart.js';
@@ -138,7 +53,7 @@ onMounted(() => {
       }
     }
   });
-  
+
   // 应用使用占比图表
   const appCtx = document.getElementById('appUsageChart').getContext('2d');
   appChart = new Chart(appCtx, {
@@ -188,4 +103,90 @@ onUnmounted(() => {
   }
 });
 </script>
-    
+
+<template>
+  <div class="h-full p-6 animate-fade">
+    <!-- 概览卡片 -->
+    <div class="grid grid-cols-3 gap-6 mb-6">
+      <div class="bg-dark-200 text-light-300 rounded-xl p-5 card-shadow hover-lift">
+        <div class="flex justify-between items-start mb-4">
+          <div class="">
+            <p class="text-sm">今日使用时长</p>
+            <h3 class="text-2xl font-bold mt-1">5h 32m</h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+            <i class="fa-regular fa-clock text-current"></i>
+          </div>
+        </div>
+        <div class="flex items-center text-sm">
+          <span class="text-secondary flex items-center">
+            <i class="fa fa-arrow-up mr-1 text-current"></i> 12%
+          </span>
+          <span class="ml-2">较昨日</span>
+        </div>
+      </div>
+
+      <div class="bg-dark-200 text-light-300 rounded-xl p-5 card-shadow hover-lift">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <p class="text-sm">打开应用数</p>
+            <h3 class="text-2xl font-bold mt-1">18</h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400">
+            <i class="fa fa-th-large text-current"></i>
+          </div>
+        </div>
+        <div class="flex items-center text-sm">
+          <span class="text-secondary flex items-center">
+            <i class="fa fa-arrow-up mr-1 text-current"></i> 3
+          </span>
+          <span class="ml-2">较昨日</span>
+        </div>
+      </div>
+
+      <div class="bg-dark-200 text-light-300 rounded-xl p-5 card-shadow hover-lift">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <p class="text-sm">productive 时间</p>
+            <h3 class="text-2xl font-bold mt-1">3h 15m</h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400">
+            <i class="fa-regular fa-check-circle text-current"></i>
+          </div>
+        </div>
+        <div class="flex items-center text-sm">
+          <span class="text-red-400 flex items-center">
+            <i class="fa fa-arrow-down mr-1 text-current"></i> 5%
+          </span>
+          <span class="ml-2">较昨日</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 图表区域 -->
+    <div class="grid grid-cols-3 gap-6 h-[calc(100%-12rem)] text-light-300">
+      <div class="bg-dark-200 rounded-xl p-5 card-shadow col-span-2 flex flex-col">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-semibold">每日使用时长</h3>
+          <div class="flex space-x-2">
+            <button
+              class="px-2 py-1 text-xs rounded bg-dark-100 hover:bg-dark-100/70 transition-colors cursor-pointer">周</button>
+            <button class="px-2 py-1 text-xs rounded bg-primary/20 text-primary cursor-pointer">月</button>
+            <button
+              class="px-2 py-1 text-xs rounded bg-dark-100 hover:bg-dark-100/70 transition-colors cursor-pointer">年</button>
+          </div>
+        </div>
+        <div class="flex-1 flex items-center justify-center">
+          <canvas id="dailyUsageChart" class="w-full h-full"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-dark-200 rounded-xl p-5 card-shadow flex flex-col">
+        <h3 class="font-semibold mb-4">应用使用占比</h3>
+        <div class="flex-1 flex items-center justify-center">
+          <canvas id="appUsageChart" class="w-full h-full max-w-[200px] max-h-[200px]"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

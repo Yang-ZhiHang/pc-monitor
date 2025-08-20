@@ -17,7 +17,7 @@ const switchView = (view: string) => {
   <div class="flex flex-col h-screen bg-dark-300">
     <!-- 顶部导航栏 -->
     <header
-      class="bg-dark-400 text-light-300 border-b border-dark-100 px-3 py-3 flex items-center justify-between z-10">
+      class="bg-dark-400 border-b border-dark-100 px-3 py-3 flex items-center justify-between z-10">
       <div class="flex items-center space-x-3">
         <div class="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
           <i class="fa fa-bar-chart text-white"></i>
@@ -51,7 +51,7 @@ const switchView = (view: string) => {
 
     <!-- 底部状态栏 -->
     <footer
-      class="bg-dark-400 border-t border-dark-100 px-6 py-2 text-xs text-light-300 flex justify-between items-center">
+      class="bg-dark-400 border-t border-dark-100 px-6 py-2 text-xs flex justify-between items-center">
       <div>
         <span>版本 1.0.0</span>
       </div>
@@ -69,10 +69,10 @@ const switchView = (view: string) => {
         </div>
         <div class="ml-3">
           <p class="text-sm font-medium">导出成功</p>
-          <p class="text-xs text-light-300 mt-1">统计数据已成功导出，正在打开预览...</p>
+          <p class="text-xs mt-1">统计数据已成功导出，正在打开预览...</p>
         </div>
         <button @click="showExportSuccess = false" class="ml-auto flex-shrink-0">
-          <i class="fa fa-times text-light-300 hover:text-light-100"></i>
+          <i class="fa fa-times hover:text-light-100"></i>
         </button>
       </div>
     </div>
