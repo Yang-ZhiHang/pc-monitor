@@ -1,17 +1,18 @@
 use log::debug;
 use std::path::Path;
 use sysinfo::{Pid, System};
-use windows::{
-    Win32::UI::WindowsAndMessaging::GetForegroundWindow,
-    Win32::UI::WindowsAndMessaging::GetWindowThreadProcessId,
-};
 
+#[cfg(target_os = "windows")]
 /// Get the window which is focused currently.
 ///
 /// ## Returns
 ///
 /// The name of the focused window.
 pub fn current_window() -> String {
+    use windows::{
+        Win32::UI::WindowsAndMessaging::GetForegroundWindow,
+        Win32::UI::WindowsAndMessaging::GetWindowThreadProcessId,
+    };
     unsafe {
         let hwnd = GetForegroundWindow();
         let mut pid = 0;
@@ -43,10 +44,12 @@ pub fn current_window() -> String {
 ///
 /// ## Example
 ///
-/// ```
-/// let path = Path::from(r"path\to\vscode.exe");
+/// ```no-run
+/// use super::*;
+/// 
+/// let path = Path::new(r"D:\app\Microsoft VS Code\Code.exe");
 /// let friendly_name = friendly_name_from_exe(path);
-/// assert_eq!(friendly_name, "Visual Studio Code");
+/// assert_eq!(friendly_name.unwrap_or_default(), "Visual Studio Code");
 /// ```
 fn friendly_name_from_exe(exe: &Path) -> Option<String> {
     use std::os::windows::ffi::OsStrExt;
@@ -55,7 +58,7 @@ fn friendly_name_from_exe(exe: &Path) -> Option<String> {
         Win32::Storage::FileSystem::{
             GetFileVersionInfoSizeW, GetFileVersionInfoW, VerQueryValueW,
         },
-        core::{Error, PCWSTR},
+        core::PCWSTR,
     };
 
     debug!("Target exe path: {}", exe.display());
@@ -97,7 +100,7 @@ fn friendly_name_from_exe(exe: &Path) -> Option<String> {
         {
             debug!(
                 "VerQueryValueW(Translation) failed: {}",
-                Error::from_win32()
+                windows::core::Error::from_win32()
             );
             return None;
         }

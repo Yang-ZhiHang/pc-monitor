@@ -20,20 +20,15 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 tauri = { version = "2", features = ["tray-icon"] }
 tauri-plugin-opener = "2"
-ctrlc = "3.4"
 chrono = "0.4"                                      # Time
-crossbeam-channel = "0.5"
 env_logger = "0.10"
-egui = "0.22"
-egui-winit = "0.22"
-egui_glow = "0.22"
 log = "0.4"
 rdev = "0.5"                                        # Cross-platform global hotkey/hook
 rusqlite = "0.28"
 sysinfo = "0.30"                                    # Process information
 serde = { version = "1.0", features = ["derive"] }  # JSON serialization
 serde_json = "1.0"
-winit = "0.30"
+tokio = { version = "1", features = ["full"] }
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.56", features = [

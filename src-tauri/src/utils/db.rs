@@ -1,7 +1,8 @@
 use crate::constants::{DB_NAME, TABLE};
-use rusqlite::{Connection, Error};
+use rusqlite::Connection;
 
-pub fn init_db() -> Result<(), Error> {
+/// Initialize the database and create necessary tables.
+pub fn init_db() -> Result<Connection, rusqlite::Error> {
     let conn = Connection::open(DB_NAME)?;
 
     let tables = [
@@ -32,10 +33,24 @@ pub fn init_db() -> Result<(), Error> {
         )?;
     }
 
-    Ok(())
+    Ok(conn)
 }
 
-pub fn insert(table_name: &str, params: &[&dyn rusqlite::ToSql]) -> Result<(), Error> {
+/// Insert a new record into the specified table.
+///
+/// ## Example
+///
+/// ```no-run
+/// use rusqlite::params;
+///
+/// let params = params![
+///     "2023-01-01 12:00:00",
+///     "Example Window"
+/// ];
+///
+/// let result = insert(TABLE::APP_USAGE_LOGS, &params);
+/// ```
+pub fn insert(table_name: &str, params: &[&dyn rusqlite::ToSql]) -> Result<(), rusqlite::Error> {
     let conn = Connection::open(DB_NAME)?;
 
     let query = match table_name {
@@ -48,7 +63,12 @@ pub fn insert(table_name: &str, params: &[&dyn rusqlite::ToSql]) -> Result<(), E
         TABLE::DAILY_USAGE_STATS => {
             "INSERT INTO daily_usage_stats (date, window_title, total_duration) VALUES (?, ?, ?)"
         }
-        _ => return Err(Error::InvalidParameterCount(0, 0)),
+        _ => {
+            return Err(rusqlite::Error::InvalidParameterName(format!(
+                "Invalid table name: {}",
+                table_name
+            )));
+        }
     };
 
     conn.execute(query, params)?;
