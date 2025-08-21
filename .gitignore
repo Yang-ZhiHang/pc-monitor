@@ -26,3 +26,9 @@ dist-ssr
 # To-Do
 src-tauri/icons
 public/
+
+# Data
+*.db
+
+# Others
+need.md

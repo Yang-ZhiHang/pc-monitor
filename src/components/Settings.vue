@@ -79,12 +79,6 @@ defineEmits(['switch-view']);
               <span>清除所有统计数据</span>
               <i class="fa fa-arrow-right text-light-300"></i>
             </button>
-
-            <button
-              class="w-full text-left px-3 py-2 text-sm rounded bg-dark-300 hover:bg-dark-100 transition-colors flex justify-between items-center cursor-pointer">
-              <span>备份数据</span>
-              <i class="fa fa-arrow-right text-light-300"></i>
-            </button>
           </div>
         </div>
 

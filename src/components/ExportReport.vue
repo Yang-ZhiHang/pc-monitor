@@ -10,7 +10,6 @@ const exportOptions = ref({
   appUsage: true,
   webHistory: true,
   durationStats: true,
-  productivity: false
 });
 
 // 导出格式
@@ -47,14 +46,14 @@ defineEmits(['export-success', 'switch-view']);
               <label class="text-xs text-light-300 mb-1 block">开始日期</label>
               <div class="relative">
                 <input type="date" v-model="startDate"
-                  class="w-full bg-dark-300 text-light-300 border border-dark-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+                  class="w-full bg-dark-200 text-light-400 border border-dark-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
               </div>
             </div>
             <div>
               <label class="text-xs text-light-300 mb-1 block">结束日期</label>
               <div class="relative">
                 <input type="date" v-model="endDate"
-                  class="w-full bg-dark-300 text-light-300 border border-dark-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+                  class="w-full bg-dark-200 text-light-400 border border-dark-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
               </div>
             </div>
           </div>
@@ -72,11 +71,6 @@ defineEmits(['export-success', 'switch-view']);
               <input type="checkbox" v-model="exportOptions.durationStats"
                 class="rounded bg-dark-300 border-dark-100 text-primary focus:ring-primary cursor-pointer">
               <span class="ml-2 text-sm">使用时长统计</span>
-            </label>
-            <label class="flex items-center">
-              <input type="checkbox" v-model="exportOptions.productivity"
-                class="rounded bg-dark-300 border-dark-100 text-primary focus:ring-primary cursor-pointer">
-              <span class="ml-2 text-sm">productive 分析</span>
             </label>
           </div>
         </div>
@@ -123,3 +117,9 @@ defineEmits(['export-success', 'switch-view']);
     </div>
   </div>
 </template>
+
+<style scoped>
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+</style>

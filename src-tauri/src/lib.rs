@@ -1,14 +1,18 @@
 use rdev::{Event, EventType, listen};
 use std::thread;
 use tauri::tray::TrayIconBuilder;
+mod core;
 mod utils;
+mod constants;
+use core::db::init_db;
 use utils::window::current_window;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    init_db().expect("Error initializing database");
     thread::spawn(|| {
         listen(|evt: Event| match evt.event_type {
-            EventType::KeyPress(_) | EventType::ButtonPress(_) => {
+            EventType::KeyRelease(_) | EventType::ButtonRelease(_) => {
                 let ca = current_window();
                 println!("Current window: {}", ca);
             }

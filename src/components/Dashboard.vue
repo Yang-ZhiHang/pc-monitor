@@ -111,7 +111,7 @@ onUnmounted(() => {
       <div class="bg-dark-200 text-light-300 rounded-xl p-5 card-shadow hover-lift">
         <div class="flex justify-between items-start mb-4">
           <div class="">
-            <p class="text-sm">今日使用时长</p>
+            <p class="text-sm">今日电脑使用时长</p>
             <h3 class="text-2xl font-bold mt-1">5h 32m</h3>
           </div>
           <div class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
@@ -138,25 +138,7 @@ onUnmounted(() => {
         </div>
         <div class="flex items-center text-sm">
           <span class="text-secondary flex items-center">
-            <i class="fa fa-arrow-up mr-1 text-current"></i> 3
-          </span>
-          <span class="ml-2">较昨日</span>
-        </div>
-      </div>
-
-      <div class="bg-dark-200 text-light-300 rounded-xl p-5 card-shadow hover-lift">
-        <div class="flex justify-between items-start mb-4">
-          <div>
-            <p class="text-sm">productive 时间</p>
-            <h3 class="text-2xl font-bold mt-1">3h 15m</h3>
-          </div>
-          <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400">
-            <i class="fa-regular fa-check-circle text-current"></i>
-          </div>
-        </div>
-        <div class="flex items-center text-sm">
-          <span class="text-red-400 flex items-center">
-            <i class="fa fa-arrow-down mr-1 text-current"></i> 5%
+            <i class="fa fa-arrow-down mr-1 text-current"></i> 3
           </span>
           <span class="ml-2">较昨日</span>
         </div>
