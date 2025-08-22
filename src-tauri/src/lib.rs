@@ -3,12 +3,12 @@ use rusqlite::params;
 use std::thread;
 use tauri::tray::TrayIconBuilder;
 
-mod constants;
 mod core;
+mod constants;
 mod utils;
 use constants::TABLE;
 use core::schedule::register_scheduled_task;
-use core::stats::update_daily_app_usage;
+use core::stats::{update_daily_app_usage, update_daily_usage_stats};
 use utils::db::{init_db, insert};
 use utils::window::current_window;
 
@@ -20,9 +20,18 @@ pub fn run() {
     thread::spawn(|| {
         use tokio::time::Duration;
         register_scheduled_task(
+            "update_daily_app_usage",
             || {
                 let conn = init_db().expect("Error initializing database");
                 update_daily_app_usage(&conn).expect("Error updating daily app usage");
+            },
+            Duration::from_secs(600),
+        );
+        register_scheduled_task(
+            "update_daily_usage_stats",
+            || {
+                let conn = init_db().expect("Error initializing database");
+                update_daily_usage_stats(&conn).expect("Error updating daily usage stats");
             },
             Duration::from_secs(600),
         );
