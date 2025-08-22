@@ -1,7 +1,6 @@
+use std::sync::LazyLock;
 use tokio::runtime::Runtime;
 use tokio::time::{Duration, interval};
-
-use std::sync::LazyLock;
 
 pub static RT: LazyLock<Runtime> = LazyLock::new(|| Runtime::new().unwrap());
 

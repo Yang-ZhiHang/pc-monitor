@@ -8,15 +8,15 @@ pub fn init_db() -> Result<Connection, rusqlite::Error> {
     let tables = [
         (
             TABLE::APP_USAGE_LOGS,
-            "timestamp TEXT NOT NULL, window_title TEXT NOT NULL",
+            "time DATETIME NOT NULL, app_name TEXT NOT NULL",
         ),
         (
             TABLE::DAILY_APP_USAGE,
-            "date DATE NOT NULL, window_title TEXT NOT NULL, total_duration INTEGER NOT NULL",
+            "date DATETIME NOT NULL, app_name TEXT NOT NULL, total_usage INTEGER NOT NULL, UNIQUE (date, app_name)",
         ),
         (
             TABLE::DAILY_USAGE_STATS,
-            "date DATE NOT NULL, window_title TEXT NOT NULL, total_duration INTEGER NOT NULL",
+            "date DATETIME NOT NULL, total_usage INTEGER NOT NULL, UNIQUE (date)",
         ),
     ];
 
@@ -41,7 +41,7 @@ pub fn init_db() -> Result<Connection, rusqlite::Error> {
 /// ## Example
 ///
 /// ```no-run
-/// use rusqlite::params;
+/// use super::*;
 ///
 /// let params = params![
 ///     "2023-01-01 12:00:00",
@@ -55,13 +55,13 @@ pub fn insert(table_name: &str, params: &[&dyn rusqlite::ToSql]) -> Result<(), r
 
     let query = match table_name {
         TABLE::APP_USAGE_LOGS => {
-            "INSERT INTO app_usage_logs (timestamp, window_title) VALUES (?, ?)"
+            "INSERT INTO app_usage_logs (time, app_name) VALUES (?, ?)"
         }
         TABLE::DAILY_APP_USAGE => {
-            "INSERT INTO daily_app_usage (date, window_title, total_duration) VALUES (?, ?, ?)"
+            "INSERT INTO daily_app_usage (date, app_name, total_usage) VALUES (?, ?, ?)"
         }
         TABLE::DAILY_USAGE_STATS => {
-            "INSERT INTO daily_usage_stats (date, window_title, total_duration) VALUES (?, ?, ?)"
+            "INSERT INTO daily_usage_stats (date, total_usage) VALUES (?, ?)"
         }
         _ => {
             return Err(rusqlite::Error::InvalidParameterName(format!(
