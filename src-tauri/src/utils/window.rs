@@ -44,7 +44,7 @@ pub fn current_window() -> String {
 ///
 /// ## Example
 ///
-/// ```no-run
+/// ```ignore
 /// use super::*;
 /// 
 /// let path = Path::new(r"D:\app\Microsoft VS Code\Code.exe");

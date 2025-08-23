@@ -1,5 +1,7 @@
 use crate::constants::TABLE;
-use chrono::{ Local, TimeZone, Utc};
+use crate::utils::db::init_db;
+use crate::utils::test::jsonify;
+use chrono::{Duration, Local, TimeZone, Utc};
 use log::debug;
 use rusqlite::{Connection, params};
 use std::collections::HashMap;
@@ -63,7 +65,7 @@ pub fn get_app_usage_duration(conn: &Connection) -> Result<HashMap<String, i64>,
 
     // TO-DO: if PC is sleepping, the duration may not be recorded
     // Traverse from the second row onwards
-    let mut record: HashMap<String, i64> = HashMap::new();
+    let mut result: HashMap<String, i64> = HashMap::new();
     while let Some(row) = rows.next()? {
         let cur_time = row.get::<_, String>(1)?;
         let cur_name = row.get::<_, String>(2)?;
@@ -72,7 +74,7 @@ pub fn get_app_usage_duration(conn: &Connection) -> Result<HashMap<String, i64>,
             chrono::NaiveDateTime::parse_from_str(&cur_time, "%Y-%m-%d %H:%M:%S"),
         ) {
             let duration = cur_dt.signed_duration_since(pre_dt).num_seconds();
-            record
+            result
                 .entry(pre_name.as_ref().unwrap().clone())
                 .and_modify(|v| *v += duration)
                 .or_insert(duration);
@@ -80,12 +82,12 @@ pub fn get_app_usage_duration(conn: &Connection) -> Result<HashMap<String, i64>,
         pre_time = Some(cur_time);
         pre_name = Some(cur_name);
     }
-    debug!("total_usage: {:?}", record);
-    Ok(record)
+    debug!("Total app usage duration: {}", jsonify(&result));
+    Ok(result)
 }
 
 /// Get all app usage durations that occurred today
-pub fn get_daily_usage_duration(conn: &Connection) -> Result<i64, rusqlite::Error> {
+fn get_daily_usage_duration(conn: &Connection) -> Result<i64, rusqlite::Error> {
     let local_today = get_local_date_in_utc();
 
     let sql = format!(
@@ -130,16 +132,69 @@ fn get_local_date_in_utc() -> String {
     Utc::now().date_naive().to_string()
 }
 
-#[test]
-fn test_get_app_usage_duration() {
-    use crate::utils::db::init_db;
-    let conn = init_db().expect("Error initializing database");
-    update_daily_app_usage(&conn).expect("Error updating daily app usage");
+/// Obtain the date n days ago in UTC
+fn get_recall_date_in_utc(n: i64) -> String {
+    let utc_now = Utc::now();
+    let recall_date = utc_now.date_naive() - Duration::days(n);
+    recall_date.to_string()
 }
 
-#[test]
-fn test_get_daily_usage_duration() {
-    use crate::utils::db::init_db;
-    let conn = init_db().expect("Error initializing database");
-    update_daily_usage_stats(&conn).expect("Error updating daily usage");
+#[tauri::command]
+pub fn get_recall_usage_duration_rs(n: i64) -> Result<HashMap<String, i64>, String> {
+    let conn = init_db().map_err(|e| format!("DB error: {}", e))?;
+    let local_date_in_utc = get_local_date_in_utc();
+    let start_date_in_utc = get_recall_date_in_utc(n);
+    let sql = format!(
+        "SELECT * FROM {} WHERE date BETWEEN '{}' AND '{}'",
+        TABLE::DAILY_USAGE_STATS,
+        start_date_in_utc,
+        local_date_in_utc
+    );
+    let mut stmt = conn
+        .prepare(&sql)
+        .map_err(|e| format!("SQL prepare error: {}", e))?;
+    let mut rows = stmt
+        .query([])
+        .map_err(|e| format!("SQL query error: {}", e))?;
+    let mut result = HashMap::new();
+    while let Some(row) = rows.next().map_err(|e| format!("Rows next error: {}", e))? {
+        let date = row
+            .get::<_, String>(1)
+            .map_err(|e| format!("Row get error: {}", e))?;
+        let duration = row
+            .get::<_, i64>(2)
+            .map_err(|e| format!("Row get error: {}", e))?;
+        result.insert(date, duration);
+    }
+    debug!("Recall daily usage: {}", jsonify(&result));
+    Ok(result)
+}
+
+#[cfg(test)]
+pub mod test {
+    use super::*;
+
+    #[test]
+    pub fn init_logger() {
+        env_logger::init();
+    }
+
+    #[test]
+    fn test_get_app_usage_duration() {
+        use crate::utils::db::init_db;
+        let conn = init_db().expect("Error initializing database");
+        update_daily_app_usage(&conn).expect("Error updating daily app usage");
+    }
+
+    #[test]
+    fn test_get_daily_usage_duration() {
+        use crate::utils::db::init_db;
+        let conn = init_db().expect("Error initializing database");
+        update_daily_usage_stats(&conn).expect("Error updating daily usage");
+    }
+
+    #[test]
+    fn test_recall_daily_usage_duration() {
+        let _ = get_recall_usage_duration_rs(7);
+    }
 }

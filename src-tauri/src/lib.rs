@@ -9,7 +9,7 @@ mod core;
 mod utils;
 use constants::{IGNORE_APP_LIST, TABLE};
 use core::stats::{
-    get_app_usage_duration, get_daily_usage_duration, update_daily_app_usage,
+    get_app_usage_duration, get_recall_usage_duration_rs, update_daily_app_usage,
     update_daily_usage_stats,
 };
 use core::task::register_scheduled_task;
@@ -24,15 +24,9 @@ fn get_app_usage_duration_rs() -> Result<HashMap<String, i64>, String> {
     get_app_usage_duration(&conn).map_err(|e| format!("Query error: {}", e))
 }
 
-#[tauri::command]
-fn get_daily_usage_duration_rs() -> Result<i64, String> {
-    let conn = init_db().map_err(|e| format!("DB error: {}", e))?;
-    get_daily_usage_duration(&conn).map_err(|e| format!("Query error: {}", e))
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    env_logger::init();
+    // env_logger::init();
 
     // The thread where scheduled tasks and event listening run
     thread::spawn(|| {
@@ -74,7 +68,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             get_app_usage_duration_rs,
-            get_daily_usage_duration_rs,
+            get_recall_usage_duration_rs,
         ])
         .setup(|app| {
             let _tray = TrayIconBuilder::new()
