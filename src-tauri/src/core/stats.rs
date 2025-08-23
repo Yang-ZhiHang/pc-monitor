@@ -38,7 +38,7 @@ pub fn update_daily_usage_stats(conn: &Connection) -> Result<(), rusqlite::Error
 }
 
 /// Get all app usage durations that occurred today
-fn get_app_usage_duration(conn: &Connection) -> Result<HashMap<String, i64>, rusqlite::Error> {
+pub fn get_app_usage_duration(conn: &Connection) -> Result<HashMap<String, i64>, rusqlite::Error> {
     let (start_of_day, end_of_day) = get_local_day_start_end_in_utc();
 
     let sql = format!(
@@ -85,7 +85,7 @@ fn get_app_usage_duration(conn: &Connection) -> Result<HashMap<String, i64>, rus
 }
 
 /// Get all app usage durations that occurred today
-fn get_daily_usage_duration(conn: &Connection) -> Result<i64, rusqlite::Error> {
+pub fn get_daily_usage_duration(conn: &Connection) -> Result<i64, rusqlite::Error> {
     let local_today = get_local_date_in_utc();
 
     let sql = format!(

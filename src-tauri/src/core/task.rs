@@ -2,6 +2,7 @@ use chrono::{Duration as ChronoDuration, Local, Timelike};
 use std::sync::LazyLock;
 use tokio::runtime::Runtime;
 use tokio::time::{Duration, interval, sleep};
+use rdev::{ listen, Event };
 
 pub static RT: LazyLock<Runtime> = LazyLock::new(|| Runtime::new().unwrap());
 
@@ -17,6 +18,15 @@ where
             itv.tick().await;
         }
     });
+}
+
+pub fn register_event_listener<F>(_id: &'static str, task: F)
+where
+    F: FnMut(Event) + Send + Sync + 'static,
+{
+    
+    listen(task)
+    .expect("Error listening for events");
 }
 
 pub fn _run_daily_task<F>(id: &'static str, task: F, hour: u32, minute: u32, second: u32)

@@ -1,107 +1,147 @@
-<script setup>
-import { onMounted, onUnmounted } from 'vue';
+<script lang="ts" setup>
+import { ref } from 'vue';
 import { Chart, registerables } from 'chart.js';
+import { invoke } from '@tauri-apps/api/core';
+import { ignoreAppList, chartTitle } from '@/constants/dashboard';
+import DoughnutChart from './chart/DoughnutChart.vue';
+import BarChart from './chart/BarChart.vue';
 
-// 注册Chart.js所有组件
+console.log("setup executed");
+
+// register all components of Chart.js
 Chart.register(...registerables);
 
-// 存储图表实例，用于组件卸载时销毁
-let dailyChart = null;
-let appChart = null;
+let doughnutData = ref<Object | null>(null);
+let doughnutOptions = ref<Object | null>(null);
 
-onMounted(() => {
-  // 每日使用时长图表
-  const dailyCtx = document.getElementById('dailyUsageChart').getContext('2d');
-  dailyChart = new Chart(dailyCtx, {
-    type: 'bar',
-    data: {
-      labels: ['1日', '5日', '10日', '15日', '20日', '25日', '30日'],
-      datasets: [{
-        label: '使用时长 (小时)',
-        data: [4.5, 5.2, 3.8, 6.1, 4.9, 5.5, 5.3],
-        backgroundColor: 'rgba(59, 130, 246, 0.7)',
-        borderRadius: 6,
-        barPercentage: 0.6,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
+function initDoughnutData(label: string[], data: number[], k: number = 4) {
+  doughnutData.value = {
+    labels: label.slice(0, k),
+    datasets: [{
+      label: "使用时长",
+      data: data.slice(0, k),
+      borderWidth: 0,
+      hoverOffset: 3
+    }]
+  };
+}
+
+function initDoughnutOptions() {
+  doughnutOptions.value = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: 'rgba(255, 255, 255, 0.7)',
+          padding: 15,
+          boxWidth: 10,
+          boxHeight: 10,
+          usePointStyle: true,
+          pointStyle: 'circle'
         }
       },
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: 'rgba(255, 255, 255, 0.05)'
-          },
-          ticks: {
-            color: 'rgba(255, 255, 255, 0.7)'
-          }
-        },
-        x: {
-          grid: {
-            display: false
-          },
-          ticks: {
-            color: 'rgba(255, 255, 255, 0.7)'
+      tooltip: {
+        callbacks: {
+          label: function (context: any) {
+            const value = context.dataset.data[context.dataIndex];
+            return `${context.dataset.label}: ${format_seconds(value)}`;
           }
         }
       }
-    }
-  });
-
-  // 应用使用占比图表
-  const appCtx = document.getElementById('appUsageChart').getContext('2d');
-  appChart = new Chart(appCtx, {
-    type: 'doughnut',
-    data: {
-      labels: ['浏览器', '编辑器', '终端', '其他'],
-      datasets: [{
-        data: [40, 30, 15, 15],
-        backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(139, 92, 246, 0.8)',
-          'rgba(66, 70, 85, 0.8)'
-        ],
-        borderWidth: 0,
-        hoverOffset: 4
-      }]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            color: 'rgba(255, 255, 255, 0.7)',
-            padding: 15,
-            boxWidth: 10,
-            boxHeight: 10,
-            usePointStyle: true,
-            pointStyle: 'circle'
-          }
+    cutout: '70%'
+  };
+}
+
+function format_seconds(sec: number) {
+  let h = Math.floor(sec / 3600);
+  let m = Math.floor((sec % 3600) / 60);
+  let s = Math.floor(sec % 60);
+  if (h == 0 && m == 0) {
+    return `${s}s`;
+  } else if (h == 0) {
+    return `${m}m${s}s`;
+  }
+  return `${h}h ${m}m ${s}s`;
+}
+
+invoke("get_app_usage_duration_rs").then(_ => {
+  let result = Object.entries(_ as Record<string, number>).sort(([, a], [, b]) => b - a);
+  let label: string[] = [];
+  let time: number[] = [];
+  for (const [key, val] of result) {
+    if (ignoreAppList.includes(key)) continue;
+    label.push(key);
+    time.push(val);
+  }
+  initDoughnutData(label, time, 5);
+  initDoughnutOptions();
+}).catch((error) => {
+  console.error("Error fetching app usage duration:", error);
+});
+
+let barData = ref<Object | null>(null);
+let barOptions = ref<Object | null>(null);
+
+function initBarData() {
+  barData.value = {
+    labels: ['1日', '5日', '10日', '15日', '20日', '25日', '30日'],
+    datasets: [{
+      label: '使用时长 (小时)',
+      data: [4.5, 5.2, 3.8, 6.1, 4.9, 5.5, 5.3],
+      backgroundColor: 'rgba(59, 130, 246, 0.7)',
+      borderRadius: 6,
+      doughnutPercentage: 0.6,
+    }]
+  };
+}
+
+function initBarOptions() {
+  barOptions.value = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(255, 255, 255, 0.05)'
+        },
+        ticks: {
+          color: 'rgba(255, 255, 255, 0.7)'
         }
       },
-      cutout: '70%'
+      x: {
+        grid: {
+          display: false
+        },
+        ticks: {
+          color: 'rgba(255, 255, 255, 0.7)'
+        }
+      }
     }
-  });
+  }
+}
+invoke("get_daily_usage_duration_rs").then(_ => {
+  let result = _ as number;
+  console.log("Daily usage duration:", result);
+  let h = Math.round(result / 60 / 60);
+  let m = Math.round(result / 60 % 60);
+  let s = Math.round(result % 60);
+  console.log(`${h}:${m}:${s}`);
+  initBarData();
+  initBarOptions();
+}).catch((error) => {
+  console.error("Error fetching app usage duration:", error);
 });
 
-// 组件卸载时销毁图表，避免内存泄漏
-onUnmounted(() => {
-  if (dailyChart) {
-    dailyChart.destroy();
-  }
-  if (appChart) {
-    appChart.destroy();
-  }
-});
+
 </script>
 
 <template>
@@ -137,7 +177,7 @@ onUnmounted(() => {
           </div>
         </div>
         <div class="flex items-center text-sm">
-          <span class="text-secondary flex items-center">
+          <span class="text-red-400 flex items-center">
             <i class="fa fa-arrow-down mr-1 text-current"></i> 3
           </span>
           <span class="ml-2">较昨日</span>
@@ -149,7 +189,7 @@ onUnmounted(() => {
     <div class="grid grid-cols-3 gap-6 h-[calc(100%-12rem)] text-light-300">
       <div class="bg-dark-200 rounded-xl p-5 card-shadow col-span-2 flex flex-col">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="font-semibold">每日使用时长</h3>
+          <h3 class="font-semibold">{{ chartTitle.dailyUsage }}</h3>
           <div class="flex space-x-2">
             <button
               class="px-2 py-1 text-xs rounded bg-dark-100 hover:bg-dark-100/70 transition-colors cursor-pointer">周</button>
@@ -159,14 +199,16 @@ onUnmounted(() => {
           </div>
         </div>
         <div class="flex-1 flex items-center justify-center">
-          <canvas id="dailyUsageChart" class="w-full h-full"></canvas>
+          <!-- <canvas id="dailyUsageChart" class="w-full h-full"></canvas> -->
+          <BarChart v-if="barData && barOptions" :data="barData" :options="barOptions" />
         </div>
       </div>
 
       <div class="bg-dark-200 rounded-xl p-5 card-shadow flex flex-col">
-        <h3 class="font-semibold mb-4">应用使用占比</h3>
+        <h3 class="font-semibold mb-4">{{ chartTitle.appUsage }}</h3>
         <div class="flex-1 flex items-center justify-center">
-          <canvas id="appUsageChart" class="w-full h-full max-w-[200px] max-h-[200px]"></canvas>
+          <!-- <canvas id="appUsageChart" class="w-full h-full max-w-[300px] max-h-[300px]"></canvas> -->
+          <DoughnutChart v-if="doughnutData && doughnutOptions" :data="doughnutData" :options="doughnutOptions" />
         </div>
       </div>
     </div>

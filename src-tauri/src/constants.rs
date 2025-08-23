@@ -6,3 +6,10 @@ impl TABLE {
     pub const DAILY_APP_USAGE: &str = "daily_app_usage";
     pub const DAILY_USAGE_STATS: &str = "daily_usage_stats";
 }
+
+pub const IGNORE_APP_LIST: &[&str] = &[
+    "Windows Shell Experience Host",
+    "LockApp.exe",
+    "Windows 资源管理器",
+    "Microsoft Edge WebView2"
+];

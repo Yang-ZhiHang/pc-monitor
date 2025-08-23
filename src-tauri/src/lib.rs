@@ -1,16 +1,34 @@
-use rdev::{Event, EventType, listen};
+use rdev::{Event, EventType};
 use rusqlite::params;
+use std::collections::HashMap;
 use std::thread;
 use tauri::tray::TrayIconBuilder;
 
-mod core;
 mod constants;
+mod core;
 mod utils;
-use constants::TABLE;
-use core::schedule::register_scheduled_task;
-use core::stats::{update_daily_app_usage, update_daily_usage_stats};
+use constants::{IGNORE_APP_LIST, TABLE};
+use core::stats::{
+    get_app_usage_duration, get_daily_usage_duration, update_daily_app_usage,
+    update_daily_usage_stats,
+};
+use core::task::register_scheduled_task;
 use utils::db::{init_db, insert};
 use utils::window::current_window;
+
+use crate::core::task::register_event_listener;
+
+#[tauri::command]
+fn get_app_usage_duration_rs() -> Result<HashMap<String, i64>, String> {
+    let conn = init_db().map_err(|e| format!("DB error: {}", e))?;
+    get_app_usage_duration(&conn).map_err(|e| format!("Query error: {}", e))
+}
+
+#[tauri::command]
+fn get_daily_usage_duration_rs() -> Result<i64, String> {
+    let conn = init_db().map_err(|e| format!("DB error: {}", e))?;
+    get_daily_usage_duration(&conn).map_err(|e| format!("Query error: {}", e))
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -35,21 +53,29 @@ pub fn run() {
             },
             Duration::from_secs(600),
         );
-        listen(|evt: Event| match evt.event_type {
-            EventType::ButtonRelease(_) => {
-                let ca = current_window();
+        let mut pre_cw: String = "".to_string();
+        register_event_listener("move_click", move |evt: Event| match evt.event_type {
+            EventType::ButtonRelease(_) | EventType::KeyRelease(_) => {
+                let cw = current_window();
+                if pre_cw == cw || IGNORE_APP_LIST.contains(&cw.as_str()) {
+                    return;
+                }
+                pre_cw = cw.clone();
                 let time_stamp = chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
-                let params = params![&time_stamp, &ca];
+                let params = params![&time_stamp, &cw];
                 insert(TABLE::APP_USAGE_LOGS, params).expect("Error inserting app usage log");
-                println!("Current window: {}", ca);
+                println!("Current window: {}", cw);
             }
             _ => {}
-        })
-        .expect("Error listening for events");
+        });
     });
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .invoke_handler(tauri::generate_handler![
+            get_app_usage_duration_rs,
+            get_daily_usage_duration_rs,
+        ])
         .setup(|app| {
             let _tray = TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())

@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import Dashboard from './components/Dashboard.vue';
 import ExportReport from './components/ExportReport.vue';
 import Settings from './components/Settings.vue';
-import { navItems } from './constants/nav';
+import { navItems, title } from './constants/nav';
 
 const currentRoute = ref<string>('dashboard');
 const showExportSuccess = ref<boolean>(false);
@@ -16,13 +16,12 @@ const switchView = (view: string) => {
 <template>
   <div class="flex flex-col h-screen bg-dark-300">
     <!-- 顶部导航栏 -->
-    <header
-      class="bg-dark-400 border-b border-dark-100 px-3 py-3 flex items-center justify-between z-10">
+    <header class="bg-dark-400 border-b border-dark-100 px-3 py-3 flex items-center justify-between z-10">
       <div class="flex items-center space-x-3">
         <div class="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
           <i class="fa fa-bar-chart text-white"></i>
         </div>
-        <h1 class="text-xl font-semibold">使用统计</h1>
+        <h1 class="text-xl font-semibold">{{ title }}</h1>
       </div>
 
       <div class="flex items-center space-x-4">
@@ -50,8 +49,7 @@ const switchView = (view: string) => {
     </main>
 
     <!-- 底部状态栏 -->
-    <footer
-      class="bg-dark-400 border-t border-dark-100 px-6 py-2 text-xs flex justify-between items-center">
+    <footer class="bg-dark-400 border-t border-dark-100 px-6 py-2 text-xs flex justify-between items-center">
       <div>
         <span>版本 1.0.0</span>
       </div>
