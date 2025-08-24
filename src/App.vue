@@ -15,7 +15,7 @@ const switchView = (view: string) => {
 
 <template>
   <div class="flex flex-col h-screen bg-dark-300">
-    <!-- 顶部导航栏 -->
+    <!-- Navigation Bar -->
     <header class="bg-dark-400 border-b border-dark-100 px-3 py-3 flex items-center justify-between z-10">
       <div class="flex items-center space-x-3">
         <div class="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
@@ -41,14 +41,14 @@ const switchView = (view: string) => {
       </div>
     </header>
 
-    <!-- 主内容区域 - 组件切换 -->
+    <!-- Main Area - Component Switching -->
     <main class="flex-1 overflow-auto relative">
       <Dashboard v-if="currentRoute === `${navItems[0].route}`" />
       <ExportReport v-if="currentRoute === `${navItems[1].route}`" @export-success="showExportSuccess = true" />
       <Settings v-if="currentRoute === `${navItems[2].route}`" />
     </main>
 
-    <!-- 底部状态栏 -->
+    <!-- Footer -->
     <footer class="bg-dark-400 border-t border-dark-100 px-6 py-2 text-xs flex justify-between items-center">
       <div>
         <span>版本 1.0.0</span>
@@ -58,7 +58,7 @@ const switchView = (view: string) => {
       </div>
     </footer>
 
-    <!-- 导出成功提示 -->
+    <!-- Export Success Notification -->
     <div v-if="showExportSuccess"
       class="fixed top-4 right-4 bg-dark-200 rounded-lg p-4 shadow-lg border-l-4 border-secondary animate-fade max-w-xs z-50">
       <div class="flex items-start">
