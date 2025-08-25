@@ -1,6 +1,6 @@
 export const chartTitle: Record<string, string> = {
-    dailyUsage: '每日电脑使用时长/小时',
-    appUsage: '今日 TOP4 应用使用占比'
+    dailyUsage: 'dashboard.chart.0',
+    appUsage: 'dashboard.chart.1'
 }
 
 export enum Period {
@@ -15,9 +15,9 @@ export type PeriodType =
     | Period.YEARLY;
 
 export const periodText: Record<PeriodType, string> = {
-    [Period.WEEKLY]: '周',
-    [Period.MONTHLY]: '月',
-    [Period.YEARLY]: '年'
+    [Period.WEEKLY]: 'dashboard.period.week',
+    [Period.MONTHLY]: 'dashboard.period.month',
+    [Period.YEARLY]: 'dashboard.period.year'
 };
 
 export const periodLabel: Record<PeriodType, string[]> = {
@@ -26,20 +26,23 @@ export const periodLabel: Record<PeriodType, string[]> = {
     [Period.YEARLY]: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
 };
 
-export const compareCardInfo: Array<{ title: string; icon: string; bgColor: string }> = [
+export const compareCardInfo: Array<{ title: string; icon: string; bgColor: string; cmpText: string }> = [
     {
-        title: '本周总使用',
+        title: 'dashboard.cmp-card.0.title',
         icon: 'calendar-week',
-        bgColor: 'bg-primary/20 text-primary'
+        bgColor: 'bg-primary/20 text-primary',
+        cmpText: 'dashboard.cmp-card.0.cmpText'
     },
     {
-        title: '活跃应用',
+        title: 'dashboard.cmp-card.1.title',
         icon: 'puzzle-piece',
-        bgColor: 'bg-purple-500/20 text-purple-400'
+        bgColor: 'bg-purple-500/20 text-purple-400',
+        cmpText: 'dashboard.cmp-card.1.cmpText'
     },
     {
-        title: '平均每日使用',
+        title: 'dashboard.cmp-card.2.title',
         icon: 'calendar-day',
-        bgColor: 'bg-orange-500/20 text-orange-400'
+        bgColor: 'bg-orange-500/20 text-orange-400',
+        cmpText: 'dashboard.cmp-card.2.cmpText'
     }
 ]

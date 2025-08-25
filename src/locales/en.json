@@ -1,0 +1,66 @@
+{
+    "title": "PUS",
+    "nav": {
+        "overview": "Overview",
+        "export": "Export",
+        "setting": "Setting"
+    },
+    "dashboard": {
+        "period": {
+            "week": "week",
+            "month": "month",
+            "year": "year"
+        },
+        "cmp-card": {
+            "0": {
+                "title": "Total usage this week",
+                "cmpText": "cmp with last week"
+            },
+            "1": {
+                "title": "Active app",
+                "cmpText": "cmp with yest",
+                "unit": ""
+            },
+            "2": {
+                "title": "Average daily usage",
+                "cmpText": "cmp with last week"
+            }
+        },
+        "chart": {
+            "0": "Daily computer usage duration / hour",
+            "1": "Today's TOP4 app"
+        }
+    },
+    "export": {
+        "title": "Export statistical data",
+        "date-range": {
+            "title": "Date range",
+            "start": "start date",
+            "end": "end date"
+        },
+        "export-ctx": {
+            "title": "Content to be exported",
+            "0": "App usage duration",
+            "1": "Daily computer usage duration"
+        },
+        "export-fmt": "Export format",
+        "save": "Export data"
+    },
+    "setting": {
+        "title": "Setting",
+        "language": {
+            "title": "Language",
+            "0": "Language"
+        },
+        "system-setting": {
+            "title": "System",
+            "0": "Auto-start upon startup"
+        },
+        "data-management": {
+            "title": "Data Management",
+            "0": "Clear all data"
+        },
+        "save": "Save"
+    },
+    "cancel": "Cancel"
+}

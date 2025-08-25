@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import { ref, toRefs, PropType } from 'vue';
 
 const props = defineProps({
@@ -40,7 +42,7 @@ const percent = ref<number>(Math.abs(Math.round((cmpData.value[0] - cmpData.valu
     <div class="bg-dark-200 text-light-300 rounded-md p-5 card-shadow hover-lift">
         <div class="flex justify-between items-start mb-4">
             <div class="">
-                <p class="text-sm">{{ title }}</p>
+                <p class="text-sm">{{ t(title) }}</p>
                 <h3 class="text-2xl font-bold mt-1">{{ formattedData }}</h3>
             </div>
             <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="bgColor">
@@ -52,7 +54,7 @@ const percent = ref<number>(Math.abs(Math.round((cmpData.value[0] - cmpData.valu
                 <i class="mr-1 text-current" :class="sign ? 'fa fa-arrow-up' : 'fa fa-arrow-down'"></i>
                 {{ percent }}%
             </span>
-            <span class="ml-2">{{ cmpText }}</span>
+            <span class="ml-2">{{ t(cmpText) }}</span>
         </div>
     </div>
 </template>

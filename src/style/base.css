@@ -15,7 +15,7 @@
 
 @layer base {
     * {
-        color: white;
+        color: rgb(230, 230, 230);
         font-family: 'Microsoft YaHei', sans-serif;
     }
 }

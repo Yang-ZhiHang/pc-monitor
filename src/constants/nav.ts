@@ -7,7 +7,7 @@ type navItem = {
 export const title = "PUS";
 
 export const navItems: navItem[] = ([
-  { label: '概览', icon: 'chart-line', route: 'dashboard' },
-  { label: '导出', icon: 'download', route: 'export' },
-  { label: '设置', icon: 'cog', route: 'settings' }
+  { label: 'nav.overview', icon: 'chart-line', route: 'dashboard' },
+  { label: 'nav.export', icon: 'download', route: 'export' },
+  { label: 'nav.setting', icon: 'cog', route: 'settings' }
 ]);

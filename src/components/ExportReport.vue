@@ -1,4 +1,6 @@
-<script setup>
+<script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 import { ref } from 'vue';
 
 // 日期状态
@@ -24,33 +26,27 @@ const handleExport = () => {
     options: exportOptions.value,
     format: exportFormat.value
   });
-
-  // 触发导出成功事件
-  $emit('export-success');
 };
-
-// 定义组件 emits
-defineEmits(['export-success', 'switch-view']);
 </script>
 
 <template>
   <div class="min-h-min p-6 animate-fade">
     <div class="bg-dark-200 rounded-xl p-6 card-shadow h-full max-w-2xl mx-auto">
-      <h2 class="text-xl text-light-300 font-semibold mb-6">导出统计数据</h2>
+      <h2 class="text-xl text-light-300 font-semibold mb-6">{{ t('export.title') }}</h2>
 
       <div class="space-y-6">
         <div>
-          <label class="block text-light-300 text-sm mb-2">日期范围</label>
+          <label class="block text-light-300 text-sm mb-2">{{ t('export.date-range.title') }}</label>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="text-xs text-light-300 mb-1 block">开始日期</label>
+              <label class="text-xs text-light-300 mb-1 block">{{ t('export.date-range.start') }}</label>
               <div class="relative">
                 <input type="date" v-model="startDate"
                   class="w-full bg-dark-200 text-light-400 border border-dark-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
               </div>
             </div>
             <div>
-              <label class="text-xs text-light-300 mb-1 block">结束日期</label>
+              <label class="text-xs text-light-300 mb-1 block">{{ t('export.date-range.end') }}</label>
               <div class="relative">
                 <input type="date" v-model="endDate"
                   class="w-full bg-dark-200 text-light-400 border border-dark-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
@@ -60,23 +56,23 @@ defineEmits(['export-success', 'switch-view']);
         </div>
 
         <div>
-          <label class="block text-light-300 text-sm mb-2">导出内容</label>
+          <label class="block text-light-300 text-sm mb-2">{{ t('export.export-ctx.title') }}</label>
           <div class="space-y-2 text-light-300">
             <label class="flex items-center">
               <input type="checkbox" v-model="exportOptions.appUsage"
                 class="rounded bg-dark-300 border-dark-100 text-primary focus:ring-primary cursor-pointer">
-              <span class="ml-2 text-sm">应用使用时间</span>
+              <span class="ml-2 text-sm">{{ t('export.export-ctx.0') }}</span>
             </label>
             <label class="flex items-center">
               <input type="checkbox" v-model="exportOptions.durationStats"
                 class="rounded bg-dark-300 border-dark-100 text-primary focus:ring-primary cursor-pointer">
-              <span class="ml-2 text-sm">使用时长统计</span>
+              <span class="ml-2 text-sm">{{ t('export.export-ctx.1') }}</span>
             </label>
           </div>
         </div>
 
         <div>
-          <label class="block text-light-300 text-sm mb-2">导出格式</label>
+          <label class="block text-light-300 text-sm mb-2">{{ t('export.export-fmt') }}</label>
           <div class="grid grid-cols-3 gap-3 text-light-300">
             <label
               class="flex flex-col items-center p-3 border border-dark-100 rounded-md hover:border-primary cursor-pointer transition-colors"
@@ -103,14 +99,10 @@ defineEmits(['export-success', 'switch-view']);
         </div>
 
         <div class="pt-4 border-t border-dark-100 flex justify-end text-light-300">
-          <button @click="$emit('switch-view', 'stats')"
-            class="px-4 py-2 mr-3 text-sm rounded border border-dark-100 hover:bg-dark-100 transition-colors cursor-pointer">
-            取消
-          </button>
           <button @click="handleExport"
             class="px-4 py-2 text-sm rounded bg-primary hover:bg-primary/90 transition-colors flex items-center cursor-pointer">
             <i class="fa fa-download mr-2"></i>
-            导出数据
+            {{ t("export.save") }}
           </button>
         </div>
       </div>
@@ -120,6 +112,6 @@ defineEmits(['export-success', 'switch-view']);
 
 <style scoped>
 input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
+  filter: invert(1);
 }
 </style>

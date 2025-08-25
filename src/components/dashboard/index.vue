@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 import { ref, watch } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import { invoke } from '@tauri-apps/api/core';
@@ -210,27 +212,27 @@ const dailyUsageReady = ref<Boolean>(false);
     <div class="grid grid-cols-3 gap-3 mb-3" v-if="appUsageReady && dailyUsageReady">
       <CompareCard :title="compareCardInfo[0].title" :formattedData="format_seconds(getWeekDataSum(dailyUsage!))"
         :cmpData="[getWeekDataSum(dailyUsage!), getWeekDataSum(dailyUsage!, 1)]" :icon="compareCardInfo[0].icon"
-        :bgColor="compareCardInfo[0].bgColor" :cmpText="'较上周'" />
-      <CompareCard :title="compareCardInfo[1].title" :formattedData="`${Object.keys(appUsage!).length} 个`"
+        :bgColor="compareCardInfo[0].bgColor" :cmpText="compareCardInfo[0].cmpText" />
+      <CompareCard :title="compareCardInfo[1].title" :formattedData="`${Object.keys(appUsage!).length} ${t('dashboard.cmp-card.1.unit')}`"
         :cmpData="[cmpCardData[1][0], cmpCardData[1][1]]" :icon="compareCardInfo[1].icon"
-        :bgColor="compareCardInfo[1].bgColor" :cmpText="'较昨日'" />
+        :bgColor="compareCardInfo[1].bgColor" :cmpText="compareCardInfo[1].cmpText" />
       <CompareCard :title="compareCardInfo[2].title" :formattedData="format_seconds(getWeekDataAvg(dailyUsage!))"
         :cmpData="[getWeekDataAvg(dailyUsage!), getWeekDataAvg(dailyUsage!, 1)]" :icon="compareCardInfo[2].icon"
-        :bgColor="compareCardInfo[2].bgColor" :cmpText="'较上周'" />
+        :bgColor="compareCardInfo[2].bgColor" :cmpText="compareCardInfo[2].cmpText" />
     </div>
 
     <!-- Chart Area -->
     <div class="grid grid-cols-3 gap-3 h-[calc(100%-12rem)] text-light-300">
       <div class="bg-dark-200 rounded-md p-5 card-shadow col-span-2 flex flex-col">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="font-semibold">{{ chartTitle.dailyUsage }}</h3>
+          <h3 class="font-semibold">{{ t(chartTitle.dailyUsage) }}</h3>
           <div class="flex space-x-2">
             <button v-for="(label, key) in periodText" :key="key" class="px-2 py-1 text-xs rounded transition-colors"
               @click="period = key" :class="[
                 period === key
                   ? 'bg-primary/20 text-primary cursor-default'
                   : 'bg-dark-100 hover:bg-dark-100/70 cursor-pointer'
-              ]">{{ label }}</button>
+              ]">{{ t(label) }}</button>
           </div>
         </div>
         <div class="flex-1 flex items-center justify-center">
@@ -240,7 +242,7 @@ const dailyUsageReady = ref<Boolean>(false);
       </div>
 
       <div class="bg-dark-200 rounded-md p-5 card-shadow flex flex-col">
-        <h3 class="font-semibold mb-4">{{ chartTitle.appUsage }}</h3>
+        <h3 class="font-semibold mb-4">{{ t(chartTitle.appUsage) }}</h3>
         <div class="flex-1 flex items-center justify-center">
           <!-- <canvas id="appUsageChart" class="w-full h-full max-w-[300px] max-h-[300px]"></canvas> -->
           <DoughnutChart v-if="doughnutData && doughnutOptions" :data="doughnutData" :options="doughnutOptions" />

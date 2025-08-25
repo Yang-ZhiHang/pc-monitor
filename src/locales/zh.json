@@ -1,0 +1,65 @@
+{
+    "title": "PUS",
+    "nav": {
+        "overview": "概览",
+        "export": "导出",
+        "setting": "设置"
+    },
+    "dashboard": {
+        "period": {
+            "week": "周",
+            "month": "月",
+            "year": "年"
+        },
+        "cmp-card": {
+            "0": {
+                "title": "本周总使用",
+                "cmpText": "较上周"
+            },
+            "1": {
+                "title": "活跃应用",
+                "cmpText": "较昨日",
+                "unit": "个"
+            },
+            "2": {
+                "title": "平均每日使用",
+                "cmpText": "较上周"
+            }
+        },
+        "chart": {
+            "0": "每日电脑使用时长/小时",
+            "1": "今日 TOP4 应用"
+        }
+    },
+    "export": {
+        "title": "导出统计数据",
+        "date-range": {
+            "title": "日期范围",
+            "start": "开始日期",
+            "end": "结束日期"
+        },
+        "export-ctx": {
+            "title": "导出内容",
+            "0": "应用使用时长",
+            "1": "每日电脑使用时长"
+        },
+        "export-fmt": "导出格式",
+        "save": "导出数据"
+    },
+    "setting": {
+        "title": "设置",
+        "language": {
+            "title": "语言"
+        },
+        "system-setting": {
+            "title": "系统",
+            "0": "开机自启动"
+        },
+        "data-management": {
+            "title": "数据管理",
+            "0": "清除所有数据"
+        },
+        "save": "保存设置"
+    },
+    "cancel": "取消"
+}
