@@ -19,9 +19,13 @@ use utils::window::current_window;
 use crate::core::task::register_event_listener;
 
 #[tauri::command]
-fn get_app_usage_duration_rs() -> Result<HashMap<String, i64>, String> {
+fn get_app_usage_duration_rs(local_date: String) -> Result<HashMap<String, i64>, String> {
+    use chrono::NaiveDate;
     let conn = init_db().map_err(|e| format!("DB error: {}", e))?;
-    get_app_usage_duration(&conn).map_err(|e| format!("Query error: {}", e))
+    // convert yyyy-mm-dd String to NaiveDate
+    let local_date = NaiveDate::parse_from_str(&local_date, "%Y-%m-%d")
+        .map_err(|e| format!("Date parse error: {}", e))?;
+    get_app_usage_duration(&conn, local_date).map_err(|e| format!("Query error: {}", e))
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

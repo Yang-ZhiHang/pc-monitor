@@ -1,7 +1,7 @@
 use crate::constants::TABLE;
 use crate::utils::db::init_db;
 use crate::utils::test::jsonify;
-use chrono::{Duration, Local, TimeZone, Utc};
+use chrono::{Duration, Local, NaiveDate, TimeZone, Utc};
 use log::debug;
 use rusqlite::{Connection, params};
 use std::collections::HashMap;
@@ -9,17 +9,18 @@ use std::collections::HashMap;
 /// Update the daily usage statistics for a specific application (data derived from app usage logs).
 pub fn update_daily_app_usage(conn: &Connection) -> Result<(), rusqlite::Error> {
     // 1. Obtain today's date (yyyy-mm-dd)
-    let today = chrono::Utc::now().date_naive().to_string();
+    let utc_today = chrono::Utc::now().date_naive().to_string();
 
     // 2. Update usage duration for each app
-    let usage_map = get_app_usage_duration(&conn)?;
+    let local_today = Local::now().date_naive();
+    let usage_map = get_app_usage_duration(&conn, local_today)?;
     for (key, val) in &usage_map {
         let sql = format!(
             "INSERT INTO {} (date, app_name, total_usage) VALUES (?, ?, ?) ON CONFLICT(date, app_name) DO UPDATE SET total_usage = ?",
             TABLE::DAILY_APP_USAGE
         );
         let mut stmt = conn.prepare(&sql)?;
-        stmt.execute(params![today, key, val, val])?;
+        stmt.execute(params![utc_today, key, val, val])?;
     }
     Ok(())
 }
@@ -40,8 +41,8 @@ pub fn update_daily_usage_stats(conn: &Connection) -> Result<(), rusqlite::Error
 }
 
 /// Get all app usage durations that occurred today
-pub fn get_app_usage_duration(conn: &Connection) -> Result<HashMap<String, i64>, rusqlite::Error> {
-    let (start_of_day, end_of_day) = get_local_day_start_end_in_utc();
+pub fn get_app_usage_duration(conn: &Connection, local_date: NaiveDate) -> Result<HashMap<String, i64>, rusqlite::Error> {
+    let (start_of_day, end_of_day) = get_local_day_start_end_in_utc(local_date);
 
     let sql = format!(
         "SELECT * FROM {} WHERE time BETWEEN '{}' AND '{}'",
@@ -107,12 +108,10 @@ fn get_daily_usage_duration(conn: &Connection) -> Result<i64, rusqlite::Error> {
     Ok(total_duration)
 }
 
-/// Obtain the starting and ending times of the day to which this moment belongs
-fn get_local_day_start_end_in_utc() -> (String, String) {
-    let local = Local::now();
-    let date = local.date_naive();
-    let local_start = date.and_hms_opt(0, 0, 0).unwrap();
-    let local_end = date.and_hms_opt(23, 59, 59).unwrap();
+/// Obtain the starting and ending times of the { local_date }
+fn get_local_day_start_end_in_utc(local_date: NaiveDate) -> (String, String) {
+    let local_start = local_date.and_hms_opt(0, 0, 0).unwrap();
+    let local_end = local_date.and_hms_opt(23, 59, 59).unwrap();
     // 转为 UTC
     let utc_start = Local
         .from_local_datetime(&local_start)
@@ -124,7 +123,7 @@ fn get_local_day_start_end_in_utc() -> (String, String) {
         .with_timezone(&Utc);
     let start_of_day = utc_start.format("%Y-%m-%d %H:%M:%S").to_string();
     let end_of_day = utc_end.format("%Y-%m-%d %H:%M:%S").to_string();
-    println!("Query range from {} to {}", start_of_day, end_of_day);
+    debug!("Query range from {} to {}", start_of_day, end_of_day);
     (start_of_day, end_of_day)
 }
 

@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import Dashboard from '../components/Dashboard.vue';
+import Dashboard from '../components//dashboard/index.vue';
 import ExportReport from '../components/ExportReport.vue';
 import Settings from '../components/Settings.vue';
 import { navItems } from '../constants/nav';

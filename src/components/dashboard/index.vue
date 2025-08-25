@@ -5,9 +5,14 @@ import { invoke } from '@tauri-apps/api/core';
 import { chartTitle } from '@/constants/dashboard';
 import DoughnutChart from './chart/DoughnutChart.vue';
 import BarChart from './chart/BarChart.vue';
+import CompareCard from './CompareCard.vue';
+import { getCurrentDate, getWeekDataAvg, getWeekDataSum } from '@/utils/date';
+import { format_seconds } from '@/utils/format';
 
 // register all components of Chart.js
 Chart.register(...registerables);
+
+// ===== doughnut chart
 
 let doughnutData = ref<Object | null>(null);
 let doughnutOptions = ref<Object | null>(null);
@@ -16,7 +21,7 @@ function initDoughnutData(dataset: Record<string, number>, k: number = 4) {
   doughnutData.value = {
     labels: Object.keys(dataset).slice(0, k),
     datasets: [{
-      label: "使用时长",
+      label: "时长",
       data: Object.values(dataset).slice(0, k),
       borderWidth: 0,
       hoverOffset: 3
@@ -53,63 +58,63 @@ function initDoughnutOptions() {
   };
 }
 
-function format_seconds(sec: number) {
-  let h = Math.floor(sec / 3600);
-  let m = Math.floor((sec % 3600) / 60);
-  let s = Math.floor(sec % 60);
-  if (h == 0 && m == 0) {
-    return `${s}s`;
-  } else if (h == 0) {
-    return `${m}m${s}s`;
-  }
-  return `${h}h ${m}m ${s}s`;
-}
-
-invoke("get_app_usage_duration_rs").then(_ => {
-  const result = Object.fromEntries(
+const appUsage = ref<Record<string, number> | null>(null);
+// localDate { string } 'yyyy-mm-dd'
+invoke("get_app_usage_duration_rs", { localDate: getCurrentDate() }).then(_ => {
+  console.log("(appUsage) invoke executing");
+  appUsage.value = Object.fromEntries(
     Object
       .entries(_ as Record<string, number>)
       .sort(([, a], [, b]) => b - a)
   );
-  console.log("App usage duration:", result);
-  initDoughnutData(result, 4);
+  console.log("App usage duration:", appUsage.value);
+  initDoughnutData(appUsage.value, 4);
   initDoughnutOptions();
+  // Obtain the length of appUsage
+  cmpCardData.value[1][0] = Object.keys(appUsage.value).length;
+  console.log("(appUsage) invoke executed");
 }).catch((error) => {
   console.error("Error fetching app usage duration:", error);
 });
 
-// ========== end of doughnut chart
+invoke("get_app_usage_duration_rs", { localDate: getCurrentDate(1) }).then(_ => {
+  console.log("(appUsage_yesterday) invoke executing");
+  cmpCardData.value[1][1] = Object.keys(_ as Record<string, number>).length;
+  appUsageReady.value = true;
+  console.log("(appUsage_yesterday) invoke executed");
+}).catch((error) => {
+  console.error("Error fetching app usage duration:", error);
+});
+
+// ========== bar chart
 
 let barData = ref<Object | null>(null);
 let barOptions = ref<Object | null>(null);
 
-import dayjs from 'dayjs';
-
 import { getWeekData, getWeekLabels, getMonthWeekData, getMonthWeekLabels, getYearMonthData, getYearMonthLabels } from '@/utils/date';
 
 function initBarData(dataset: Record<string, number>, p: PeriodType) {
-  const today = dayjs();
   let labels: string[] = [];
   let data: number[] = [];
   switch (p) {
     case Period.WEEKLY:
       labels = getWeekLabels();
-      data = getWeekData(dataset, today);
+      data = getWeekData(dataset);
       break;
     case Period.MONTHLY:
-      labels = getMonthWeekLabels(today);
-      data = getMonthWeekData(dataset, today);
+      labels = getMonthWeekLabels();
+      data = getMonthWeekData(dataset);
       break;
     case Period.YEARLY:
       labels = getYearMonthLabels();
-      data = getYearMonthData(dataset, today);
+      data = getYearMonthData(dataset);
       break;
   }
 
   barData.value = {
     labels,
     datasets: [{
-      label: '使用时长 (小时)',
+      label: '时长',
       data,
       backgroundColor: 'rgba(59, 130, 246, 0.7)',
       borderRadius: 6,
@@ -163,6 +168,7 @@ function initBarOptions() {
 
 const dailyUsage = ref<Record<string, number> | null>(null);
 invoke("get_recall_usage_duration_rs", { n: 365 }).then(_ => {
+  console.log("(dailyUsage) invoke executing");
   const result = Object.fromEntries(
     Object
       .keys(_ as Record<string, number>)
@@ -173,56 +179,44 @@ invoke("get_recall_usage_duration_rs", { n: 365 }).then(_ => {
   console.log("Daily usage duration:", result);
   initBarData(result, Period.WEEKLY);
   initBarOptions();
+  cmpCardData.value[0] = getCmpDays(dailyUsage.value ?? {});
+  dailyUsageReady.value = true;
+  console.log("cmpCardData:", cmpCardData.value);
+  console.log("(dailyUsage) invoke executed");
 }).catch((error) => {
   console.error("Error fetching app usage duration:", error);
 });
+
+// ===== period
 
 import { periodText, Period, type PeriodType } from '@/constants/dashboard';
 const period = ref<PeriodType>(Period.WEEKLY);
 
 watch(() => period.value, (newPeriod) => { initBarData(dailyUsage.value ?? {}, newPeriod) });
 
+// ===== cmp card
+
+import { getCmpDays } from '@/utils/date';
+import { compareCardInfo } from '../../constants/dashboard';
+
+const cmpCardData = ref<Array<[number, number]>>([[0, 0], [0, 0]]);
+const appUsageReady = ref<Boolean>(false);
+const dailyUsageReady = ref<Boolean>(false);
 </script>
 
 <template>
   <div class="h-full p-6 animate-fade">
     <!-- 概览卡片 -->
-    <div class="grid grid-cols-3 gap-6 mb-6">
-      <div class="bg-dark-200 text-light-300 rounded-xl p-5 card-shadow hover-lift">
-        <div class="flex justify-between items-start mb-4">
-          <div class="">
-            <p class="text-sm">今日电脑使用时长</p>
-            <h3 class="text-2xl font-bold mt-1">5h 32m</h3>
-          </div>
-          <div class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
-            <i class="fa-regular fa-clock text-current"></i>
-          </div>
-        </div>
-        <div class="flex items-center text-sm">
-          <span class="text-secondary flex items-center">
-            <i class="fa fa-arrow-up mr-1 text-current"></i> 12%
-          </span>
-          <span class="ml-2">较昨日</span>
-        </div>
-      </div>
-
-      <div class="bg-dark-200 text-light-300 rounded-xl p-5 card-shadow hover-lift">
-        <div class="flex justify-between items-start mb-4">
-          <div>
-            <p class="text-sm">打开应用数</p>
-            <h3 class="text-2xl font-bold mt-1">18</h3>
-          </div>
-          <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400">
-            <i class="fa fa-th-large text-current"></i>
-          </div>
-        </div>
-        <div class="flex items-center text-sm">
-          <span class="text-red-400 flex items-center">
-            <i class="fa fa-arrow-down mr-1 text-current"></i> 3
-          </span>
-          <span class="ml-2">较昨日</span>
-        </div>
-      </div>
+    <div class="grid grid-cols-3 gap-6 mb-6" v-if="appUsageReady && dailyUsageReady">
+      <CompareCard :title="compareCardInfo[0].title" :formattedData="format_seconds(getWeekDataSum(dailyUsage!))"
+        :cmpData="[getWeekDataSum(dailyUsage!), getWeekDataSum(dailyUsage!, 1)]" :icon="compareCardInfo[0].icon"
+        :bgColor="compareCardInfo[0].bgColor" :cmpText="'较上周'" />
+      <CompareCard :title="compareCardInfo[1].title" :formattedData="`${Object.keys(appUsage!).length} 个`"
+        :cmpData="[cmpCardData[1][0], cmpCardData[1][1]]" :icon="compareCardInfo[1].icon"
+        :bgColor="compareCardInfo[1].bgColor" :cmpText="'较昨日'" />
+      <CompareCard :title="compareCardInfo[2].title" :formattedData="format_seconds(getWeekDataAvg(dailyUsage!))"
+        :cmpData="[getWeekDataAvg(dailyUsage!), getWeekDataAvg(dailyUsage!, 1)]" :icon="compareCardInfo[2].icon"
+        :bgColor="compareCardInfo[2].bgColor" :cmpText="'较上周'" />
     </div>
 
     <!-- 图表区域 -->
