@@ -29,17 +29,17 @@ export const periodLabel: Record<PeriodType, string[]> = {
 export const compareCardInfo: Array<{ title: string; icon: string; bgColor: string }> = [
     {
         title: '本周总使用',
-        icon: 'fa-solid fa-calendar-week',
+        icon: 'calendar-week',
         bgColor: 'bg-primary/20 text-primary'
     },
     {
         title: '活跃应用',
-        icon: 'fa-solid fa-chart-line',
+        icon: 'puzzle-piece',
         bgColor: 'bg-purple-500/20 text-purple-400'
     },
     {
         title: '平均每日使用',
-        icon: 'fa-solid fa-calendar-day',
+        icon: 'calendar-day',
         bgColor: 'bg-orange-500/20 text-orange-400'
     }
 ]

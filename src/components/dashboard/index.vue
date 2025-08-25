@@ -207,7 +207,7 @@ const dailyUsageReady = ref<Boolean>(false);
 <template>
   <div class="h-full p-6 animate-fade">
     <!-- 概览卡片 -->
-    <div class="grid grid-cols-3 gap-6 mb-6" v-if="appUsageReady && dailyUsageReady">
+    <div class="grid grid-cols-3 gap-3 mb-3" v-if="appUsageReady && dailyUsageReady">
       <CompareCard :title="compareCardInfo[0].title" :formattedData="format_seconds(getWeekDataSum(dailyUsage!))"
         :cmpData="[getWeekDataSum(dailyUsage!), getWeekDataSum(dailyUsage!, 1)]" :icon="compareCardInfo[0].icon"
         :bgColor="compareCardInfo[0].bgColor" :cmpText="'较上周'" />
@@ -219,9 +219,9 @@ const dailyUsageReady = ref<Boolean>(false);
         :bgColor="compareCardInfo[2].bgColor" :cmpText="'较上周'" />
     </div>
 
-    <!-- 图表区域 -->
-    <div class="grid grid-cols-3 gap-6 h-[calc(100%-12rem)] text-light-300">
-      <div class="bg-dark-200 rounded-xl p-5 card-shadow col-span-2 flex flex-col">
+    <!-- Chart Area -->
+    <div class="grid grid-cols-3 gap-3 h-[calc(100%-12rem)] text-light-300">
+      <div class="bg-dark-200 rounded-md p-5 card-shadow col-span-2 flex flex-col">
         <div class="flex justify-between items-center mb-4">
           <h3 class="font-semibold">{{ chartTitle.dailyUsage }}</h3>
           <div class="flex space-x-2">
@@ -239,7 +239,7 @@ const dailyUsageReady = ref<Boolean>(false);
         </div>
       </div>
 
-      <div class="bg-dark-200 rounded-xl p-5 card-shadow flex flex-col">
+      <div class="bg-dark-200 rounded-md p-5 card-shadow flex flex-col">
         <h3 class="font-semibold mb-4">{{ chartTitle.appUsage }}</h3>
         <div class="flex-1 flex items-center justify-center">
           <!-- <canvas id="appUsageChart" class="w-full h-full max-w-[300px] max-h-[300px]"></canvas> -->

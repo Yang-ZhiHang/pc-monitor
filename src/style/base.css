@@ -11,12 +11,12 @@
     --color-light-100: #F9FAFB;
     --color-light-200: #F3F4F6;
     --color-light-300: #E5E7EB;
-    --font-sans: ['Inter', 'system-ui', 'sans-serif'];
 }
 
 @layer base {
     * {
         color: white;
+        font-family: 'Microsoft YaHei', sans-serif;
     }
 }
 

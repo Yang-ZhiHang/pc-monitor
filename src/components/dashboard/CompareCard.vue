@@ -37,14 +37,14 @@ const percent = ref<number>(Math.abs(Math.round((cmpData.value[0] - cmpData.valu
 </script>
 
 <template>
-    <div class="bg-dark-200 text-light-300 rounded-xl p-5 card-shadow hover-lift">
+    <div class="bg-dark-200 text-light-300 rounded-md p-5 card-shadow hover-lift">
         <div class="flex justify-between items-start mb-4">
             <div class="">
                 <p class="text-sm">{{ title }}</p>
                 <h3 class="text-2xl font-bold mt-1">{{ formattedData }}</h3>
             </div>
             <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="bgColor">
-                <i class="text-current" :class="icon"></i>
+                <i class="text-current" :class="`fa fa-${icon}`"></i>
             </div>
         </div>
         <div class="flex items-center text-sm">

@@ -14,32 +14,25 @@ const switchView = (view: string) => {
 </script>
 
 <template>
-  <div class="flex flex-col h-screen bg-dark-300">
+  <div class="flex h-screen bg-dark-300">
     <!-- Navigation Bar -->
-    <header class="bg-dark-400 border-b border-dark-100 px-3 py-3 flex items-center justify-between z-10">
-      <div class="flex items-center space-x-3">
+    <div class="flex flex-col items-center justify-items-start px-3 py-3 w-35 bg-dark-400 border-b border-dark-100 z-10">
+      <div class="flex items-center justify-around w-full py-2">
         <div class="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
           <i class="fa fa-bar-chart text-white"></i>
         </div>
         <h1 class="text-xl font-semibold">{{ title }}</h1>
       </div>
 
-      <div class="flex items-center space-x-4">
+      <div class="flex flex-col w-full overflow-auto">
         <button v-for="(item, index) in navItems" :key="index" @click="switchView(item.route)"
-          class="px-3 py-1.5 rounded text-sm hover:bg-dark-100 transition-colors flex items-center cursor-pointer"
+          class="flex items-center justify-around mr-0 mt-4 px-3 py-1.5 rounded text-lg hover:bg-dark-100 transition-colors cursor-pointer"
           :class="{ 'bg-primary/20 text-primary': currentRoute === item.route }">
-          <i :class="`fa fa-${item.icon} mr-2`"></i>
-          <span>{{ item.label }}</span>
-        </button>
-
-        <div class="w-px h-6 bg-dark-100 mx-1"></div>
-
-        <button
-          class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-dark-100 transition-colors cursor-pointer">
-          <i class="fa fa-question-circle"></i>
+          <i :class="`fa fa-${item.icon} mr-2 flex! items-center h-full`"></i>
+          <span class="font-bold" >{{ item.label }}</span>
         </button>
       </div>
-    </header>
+    </div>
 
     <!-- Main Area - Component Switching -->
     <main class="flex-1 overflow-auto relative">
@@ -47,16 +40,6 @@ const switchView = (view: string) => {
       <ExportReport v-if="currentRoute === `${navItems[1].route}`" @export-success="showExportSuccess = true" />
       <Settings v-if="currentRoute === `${navItems[2].route}`" />
     </main>
-
-    <!-- Footer -->
-    <footer class="bg-dark-400 border-t border-dark-100 px-6 py-2 text-xs flex justify-between items-center">
-      <div>
-        <span>版本 1.0.0</span>
-      </div>
-      <div>
-        <span>上次更新: 今天 14:30</span>
-      </div>
-    </footer>
 
     <!-- Export Success Notification -->
     <div v-if="showExportSuccess"
