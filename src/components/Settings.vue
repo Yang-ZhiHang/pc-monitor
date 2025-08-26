@@ -1,23 +1,10 @@
 <script lang="ts" setup>
 import { useI18n } from 'vue-i18n';
-const { t, locale } = useI18n();
-import { ref } from 'vue';
+const { t } = useI18n();
 import { ElSelect, ElOption } from 'element-plus';
+import { useSettingStore } from '@/stores/setting';
 
-const selectedLanguage = ref<string>(localStorage.getItem('app_language') || 'zh');
-
-const settings = ref({
-  startOnBoot: false
-});
-
-const switchLang = (lang: string) => {
-  locale.value = lang;
-}
-
-const saveSettings = () => {
-  switchLang(selectedLanguage.value);
-  localStorage.setItem('app_language', selectedLanguage.value);
-};
+const settingStore = useSettingStore();
 </script>
 
 <template>
@@ -32,9 +19,9 @@ const saveSettings = () => {
             {{ t('setting.language.title') }}
           </h3>
           <div class="pl-6">
-            <el-select v-model="selectedLanguage" placeholder="请选择语言" class="w-full" size="large">
-              <el-option label="简体中文" value="zh" />
-              <el-option label="English" value="en" />
+            <el-select v-model="settingStore.lang" class="w-full" size="large">
+              <el-option label="简体中文" value="zh" @click="settingStore.switchLang('zh')"/>
+              <el-option label="English" value="en" @click="settingStore.switchLang('en')"/>
             </el-select>
           </div>
         </div>
@@ -48,7 +35,7 @@ const saveSettings = () => {
             <label class="flex items-center justify-between">
               <span class="text-sm">{{ t('setting.system-setting.0') }}</span>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" v-model="settings.startOnBoot" class="sr-only peer">
+                <input type="checkbox" v-model="settingStore.startOnBoot" class="sr-only peer">
                 <div
                   class="w-11 h-6 bg-dark-100 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary">
                 </div>
@@ -69,13 +56,6 @@ const saveSettings = () => {
               <i class="fa fa-arrow-right text-light-300"></i>
             </button>
           </div>
-        </div>
-
-        <div class="pt-4 border-t border-dark-100 flex justify-end">
-          <button @click="saveSettings"
-            class="px-4 py-2 text-sm rounded bg-primary hover:bg-primary/90 transition-colors cursor-pointer">
-            {{ t('setting.save') }}
-          </button>
         </div>
       </div>
     </div>

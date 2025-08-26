@@ -44,7 +44,6 @@ const handleExport = () => {
               <el-date-picker
                 v-model="startDate"
                 type="date"
-                placeholder="选择开始日期"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD"
                 class="w-full"
@@ -56,7 +55,6 @@ const handleExport = () => {
               <el-date-picker
                 v-model="endDate"
                 type="date"
-                placeholder="选择结束日期"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD"
                 class="w-full"
@@ -69,12 +67,12 @@ const handleExport = () => {
         <div>
           <label class="block text-light-300 text-sm mb-2">{{ t('export.export-ctx.title') }}</label>
           <div class="space-y-2 text-light-300">
-            <label class="flex items-center">
+            <label class="flex items-center hover:bg-dark-100">
               <input type="checkbox" v-model="exportOptions.appUsage"
                 class="rounded bg-dark-300 border-dark-100 text-primary focus:ring-primary cursor-pointer">
               <span class="ml-2 text-sm">{{ t('export.export-ctx.0') }}</span>
             </label>
-            <label class="flex items-center">
+            <label class="flex items-center hover:bg-dark-100">
               <input type="checkbox" v-model="exportOptions.durationStats"
                 class="rounded bg-dark-300 border-dark-100 text-primary focus:ring-primary cursor-pointer">
               <span class="ml-2 text-sm">{{ t('export.export-ctx.1') }}</span>

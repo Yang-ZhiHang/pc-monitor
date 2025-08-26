@@ -27,7 +27,7 @@
             }
         },
         "chart": {
-            "0": "Daily computer usage duration / hour",
+            "0": "Daily PC usage duration / hour",
             "1": "Today's TOP4 app"
         },
         "no-data": "No data available"
@@ -41,8 +41,8 @@
         },
         "export-ctx": {
             "title": "Content to be exported",
-            "0": "App usage duration",
-            "1": "Daily computer usage duration"
+            "0": "Daily app usage duration",
+            "1": "Daily PC usage duration"
         },
         "export-fmt": "Export format",
         "save": "Export data"

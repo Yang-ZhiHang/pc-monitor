@@ -1,6 +1,12 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import router from './router/index';
+
+import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
+
 import ElementPlus from 'element-plus'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import './style/base.css'
@@ -19,6 +25,7 @@ const i18n = createI18n({
 
 const app = createApp(App);
 app.use(router);
-app.use(i18n);
+app.use(pinia)
 app.use(ElementPlus);
+app.use(i18n);
 app.mount("#app");
