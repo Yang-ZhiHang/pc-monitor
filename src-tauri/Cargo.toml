@@ -1,5 +1,5 @@
 [package]
-name = "pc-usage-statistics"
+name = "pc-monitor"
 version = "0.1.0"
 description = "PC Usage Statistics"
 authors = ["Yang-ZhiHang"]

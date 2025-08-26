@@ -1,7 +1,23 @@
-# Tauri + Vue + TypeScript
+# PCMonitor
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+An app for monitoring and visualizing your PC's usage metrics over time.
 
-## Recommended IDE Setup
+## Features
 
-- [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+- Historical data visualization with charts and graphs
+- Application usage tracking
+
+## Next plan
+
+- [ ] Customizable usage tracking frequency
+- [ ] A more user-friendly export panel
+    - [ ] modular panel: Export fmt、data summary、fast choice for date range
+- [ ] Refactor main dashboard
+    - [ ] App usage rank
+    - [ ] 「Total this week」 -> 「Total usage today」
+
+## Tech Stacks
+
+- Tauri: Vue3 + Vite, Rust
+- SQLite
+- Libraries: vue-i18n, vue-chartjs, dayjs

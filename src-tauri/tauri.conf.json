@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "pc-usage-statistics",
+  "productName": "pc-monitor",
   "version": "0.1.0",
-  "identifier": "com.yzh.pc-usage-statistics",
+  "identifier": "com.yzh.pc-monitor",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "pc-usage-statistics",
+        "title": "pc-monitor",
         "width": 1000,
         "height": 700,
         "decorations": false

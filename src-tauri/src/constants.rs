@@ -1,6 +1,6 @@
-pub const APP_NAME: &str = "PC Usage Statistics";
+pub const APP_NAME: &str = "PCMonitor";
 
-pub const DB_NAME: &str = "pc_usage_stats.db";
+pub const DB_NAME: &str = "pc_monitor.db";
 pub struct TABLE;
 
 impl TABLE {

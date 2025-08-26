@@ -20,7 +20,7 @@ const switchView = (view: string) => {
 <template>
   <div class="flex h-screen bg-dark-300">
     <!-- Navigation Bar -->
-    <div class="flex flex-col items-center justify-items-start px-3 py-3 w-40 bg-dark-400 border-b border-dark-100 z-10">
+    <div class="flex flex-col items-center justify-items-start px-3 py-3 w-50 bg-dark-400 border-b border-dark-100 z-10">
       <div class="flex items-center justify-around w-full py-2">
         <div class="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
           <i class="fa fa-bar-chart text-white"></i>
