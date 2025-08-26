@@ -246,6 +246,9 @@ const dailyUsageReady = ref<Boolean>(false);
         <div class="flex-1 flex items-center justify-center">
           <!-- <canvas id="appUsageChart" class="w-full h-full max-w-[300px] max-h-[300px]"></canvas> -->
           <DoughnutChart v-if="doughnutData && doughnutOptions" :data="doughnutData" :options="doughnutOptions" />
+          <div v-else class="w-full h-full flex items-center justify-center">
+            <p class="text-light-400">{{ t('dashboard.no-data') }}</p>
+          </div>
         </div>
       </div>
     </div>

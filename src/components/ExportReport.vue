@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 import { ref } from 'vue';
+import { ElDatePicker } from 'element-plus';
 
 // 日期状态
 const startDate = ref('2023-06-01');
@@ -31,7 +32,7 @@ const handleExport = () => {
 
 <template>
   <div class="min-h-min p-6 animate-fade">
-    <div class="bg-dark-200 rounded-xl p-6 card-shadow h-full max-w-2xl mx-auto">
+    <div class="h-full w-full min-w-xl mx-auto bg-dark-200 rounded-md p-6 card-shadow">
       <h2 class="text-xl text-light-300 font-semibold mb-6">{{ t('export.title') }}</h2>
 
       <div class="space-y-6">
@@ -40,17 +41,27 @@ const handleExport = () => {
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="text-xs text-light-300 mb-1 block">{{ t('export.date-range.start') }}</label>
-              <div class="relative">
-                <input type="date" v-model="startDate"
-                  class="w-full bg-dark-200 text-light-400 border border-dark-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
-              </div>
+              <el-date-picker
+                v-model="startDate"
+                type="date"
+                placeholder="选择开始日期"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+                class="w-full"
+                popper-class="bg-dark-200 text-light-400"
+              />
             </div>
             <div>
               <label class="text-xs text-light-300 mb-1 block">{{ t('export.date-range.end') }}</label>
-              <div class="relative">
-                <input type="date" v-model="endDate"
-                  class="w-full bg-dark-200 text-light-400 border border-dark-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
-              </div>
+              <el-date-picker
+                v-model="endDate"
+                type="date"
+                placeholder="选择结束日期"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+                class="w-full"
+                popper-class="bg-dark-200 text-light-400"
+              />
             </div>
           </div>
         </div>

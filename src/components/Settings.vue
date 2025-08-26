@@ -2,8 +2,9 @@
 import { useI18n } from 'vue-i18n';
 const { t, locale } = useI18n();
 import { ref } from 'vue';
+import { ElSelect, ElOption } from 'element-plus';
 
-const selectedLanguage = ref('zh');
+const selectedLanguage = ref<string>(localStorage.getItem('app_language') || 'zh');
 
 const settings = ref({
   startOnBoot: false
@@ -15,12 +16,13 @@ const switchLang = (lang: string) => {
 
 const saveSettings = () => {
   switchLang(selectedLanguage.value);
+  localStorage.setItem('app_language', selectedLanguage.value);
 };
 </script>
 
 <template>
   <div class="min-h-min p-6 animate-fade">
-    <div class="bg-dark-200 rounded-xl p-6 card-shadow h-full max-w-2xl mx-auto">
+    <div class="h-full w-full min-w-xl mx-auto bg-dark-200 rounded-md p-6 card-shadow">
       <h2 class="text-xl font-semibold mb-6 text-light-300">{{ t('setting.title') }}</h2>
 
       <div class="space-y-6 text-light-300">
@@ -30,11 +32,10 @@ const saveSettings = () => {
             {{ t('setting.language.title') }}
           </h3>
           <div class="pl-6">
-            <select v-model="selectedLanguage"
-              class="w-full bg-dark-300 border border-dark-100 rounded-md mr-3 pl-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
-              <option value='zh'>简体中文</option>
-              <option value='en'>English</option>
-            </select>
+            <el-select v-model="selectedLanguage" placeholder="请选择语言" class="w-full" size="large">
+              <el-option label="简体中文" value="zh" />
+              <el-option label="English" value="en" />
+            </el-select>
           </div>
         </div>
 

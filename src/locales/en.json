@@ -29,7 +29,8 @@
         "chart": {
             "0": "Daily computer usage duration / hour",
             "1": "Today's TOP4 app"
-        }
+        },
+        "no-data": "No data available"
     },
     "export": {
         "title": "Export statistical data",

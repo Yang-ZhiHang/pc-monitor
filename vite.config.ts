@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path';
+import ElementPlus from 'unplugin-element-plus/vite'
 
 const host = process.env.TAURI_DEV_HOST;
 
@@ -9,7 +10,8 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig(async () => ({
   plugins: [
     vue(),
-    tailwindcss(),
+    tailwindcss(), 
+    ElementPlus()
   ],
   resolve: {
     alias: {
