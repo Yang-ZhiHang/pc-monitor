@@ -183,7 +183,6 @@ invoke("get_recall_usage_duration_rs", { n: 365 }).then(_ => {
   initBarOptions();
   cmpCardData.value[0] = getCmpDays(dailyUsage.value ?? {});
   dailyUsageReady.value = true;
-  console.log("cmpCardData:", cmpCardData.value);
   console.log("(dailyUsage) invoke executed");
 }).catch((error) => {
   console.error("Error fetching app usage duration:", error);
@@ -194,7 +193,7 @@ invoke("get_recall_usage_duration_rs", { n: 365 }).then(_ => {
 import { periodText, Period, type PeriodType } from '@/constants/dashboard';
 const period = ref<PeriodType>(Period.WEEKLY);
 
-watch(() => period.value, (newPeriod) => { initBarData(dailyUsage.value ?? {}, newPeriod) });
+watch(period, (newPeriod) => { initBarData(dailyUsage.value ?? {}, newPeriod) });
 
 // ===== cmp card
 

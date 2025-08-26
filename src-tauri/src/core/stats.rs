@@ -41,7 +41,10 @@ pub fn update_daily_usage_stats(conn: &Connection) -> Result<(), rusqlite::Error
 }
 
 /// Get all app usage durations that occurred today
-pub fn get_app_usage_duration(conn: &Connection, local_date: NaiveDate) -> Result<HashMap<String, i64>, rusqlite::Error> {
+pub fn get_app_usage_duration(
+    conn: &Connection,
+    local_date: NaiveDate,
+) -> Result<HashMap<String, i64>, rusqlite::Error> {
     let (start_of_day, end_of_day) = get_local_day_start_end_in_utc(local_date);
 
     let sql = format!(
@@ -136,6 +139,16 @@ fn get_recall_date_in_utc(n: i64) -> String {
     let utc_now = Utc::now();
     let recall_date = utc_now.date_naive() - Duration::days(n);
     recall_date.to_string()
+}
+
+#[tauri::command]
+pub fn get_app_usage_duration_rs(local_date: String) -> Result<HashMap<String, i64>, String> {
+    use chrono::NaiveDate;
+    let conn = init_db().map_err(|e| format!("DB error: {}", e))?;
+    // convert yyyy-mm-dd String to NaiveDate
+    let local_date = NaiveDate::parse_from_str(&local_date, "%Y-%m-%d")
+        .map_err(|e| format!("Date parse error: {}", e))?;
+    get_app_usage_duration(&conn, local_date).map_err(|e| format!("Query error: {}", e))
 }
 
 #[tauri::command]

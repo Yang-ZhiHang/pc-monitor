@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useI18n } from 'vue-i18n';
+import { invoke } from "@tauri-apps/api/core";
 
 export const useSettingStore = defineStore('setting', () => {
     const { locale } = useI18n();
@@ -11,5 +12,10 @@ export const useSettingStore = defineStore('setting', () => {
         lang.value = l;
         locale.value = l;
     }
+
+    watch(startOnBoot, (newVal) => {
+        invoke('set_start_on_boot_rs', { enable: newVal });
+    });
+
     return { lang, startOnBoot, switchLang };
 }, { persist: true });

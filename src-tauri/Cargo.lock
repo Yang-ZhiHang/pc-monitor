@@ -2713,6 +2713,7 @@ dependencies = [
  "tauri-plugin-opener",
  "tokio",
  "windows 0.56.0",
+ "winreg",
 ]
 
 [[package]]

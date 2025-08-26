@@ -1,6 +1,5 @@
 use rdev::{Event, EventType};
 use rusqlite::params;
-use std::collections::HashMap;
 use std::thread;
 use tauri::tray::TrayIconBuilder;
 
@@ -9,24 +8,14 @@ mod core;
 mod utils;
 use constants::{IGNORE_APP_LIST, TABLE};
 use core::stats::{
-    get_app_usage_duration, get_recall_usage_duration_rs, update_daily_app_usage,
+    get_app_usage_duration_rs, get_recall_usage_duration_rs, update_daily_app_usage,
     update_daily_usage_stats,
 };
+use core::task::register_event_listener;
 use core::task::register_scheduled_task;
+use utils::autostart::set_start_on_boot_rs;
 use utils::db::{init_db, insert};
 use utils::window::current_window;
-
-use crate::core::task::register_event_listener;
-
-#[tauri::command]
-fn get_app_usage_duration_rs(local_date: String) -> Result<HashMap<String, i64>, String> {
-    use chrono::NaiveDate;
-    let conn = init_db().map_err(|e| format!("DB error: {}", e))?;
-    // convert yyyy-mm-dd String to NaiveDate
-    let local_date = NaiveDate::parse_from_str(&local_date, "%Y-%m-%d")
-        .map_err(|e| format!("Date parse error: {}", e))?;
-    get_app_usage_duration(&conn, local_date).map_err(|e| format!("Query error: {}", e))
-}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -55,6 +44,7 @@ pub fn run() {
         register_event_listener("move_click", move |evt: Event| match evt.event_type {
             EventType::ButtonRelease(_) | EventType::KeyRelease(_) => {
                 let cw = current_window();
+                println!("Current window: {}", cw);
                 if pre_cw == cw || IGNORE_APP_LIST.contains(&cw.as_str()) {
                     return;
                 }
@@ -62,7 +52,6 @@ pub fn run() {
                 let time_stamp = chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
                 let params = params![&time_stamp, &cw];
                 insert(TABLE::APP_USAGE_LOGS, params).expect("Error inserting app usage log");
-                println!("Current window: {}", cw);
             }
             _ => {}
         });
@@ -73,6 +62,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_app_usage_duration_rs,
             get_recall_usage_duration_rs,
+            set_start_on_boot_rs,
         ])
         .setup(|app| {
             let _tray = TrayIconBuilder::new()
