@@ -93,22 +93,22 @@ invoke("get_app_usage_duration_rs", { localDate: getCurrentDate(1) }).then(_ => 
 let barData = ref<Object | null>(null);
 let barOptions = ref<Object | null>(null);
 
-import { getWeekData, getWeekLabels, getMonthWeekData, getMonthWeekLabels, getYearMonthData, getYearMonthLabels } from '@/utils/date';
+import { getWeekData, getWeekLabelKey, getMonthWeekData, getMonthWeekLabelKey, getYearMonthData, getYearMonthLabelKey } from '@/utils/date';
 
 function initBarData(dataset: Record<string, number>, p: PeriodType) {
   let labels: string[] = [];
   let data: number[] = [];
   switch (p) {
     case Period.WEEKLY:
-      labels = getWeekLabels();
+      labels = getWeekLabelKey().map(label => t(label));
       data = getWeekData(dataset);
       break;
     case Period.MONTHLY:
-      labels = getMonthWeekLabels();
+      labels = getMonthWeekLabelKey().map(label => t(label));
       data = getMonthWeekData(dataset);
       break;
     case Period.YEARLY:
-      labels = getYearMonthLabels();
+      labels = getYearMonthLabelKey().map(label => t(label));
       data = getYearMonthData(dataset);
       break;
   }
@@ -206,13 +206,14 @@ const dailyUsageReady = ref<Boolean>(false);
 </script>
 
 <template>
-  <div class="h-full p-6 animate-fade">
+  <div class="h-full p-6 animate-fade overflow-auto">
     <!-- 概览卡片 -->
     <div class="grid grid-cols-3 gap-3 mb-3" v-if="appUsageReady && dailyUsageReady">
       <CompareCard :title="compareCardInfo[0].title" :formattedData="format_seconds(getWeekDataSum(dailyUsage!))"
         :cmpData="[getWeekDataSum(dailyUsage!), getWeekDataSum(dailyUsage!, 1)]" :icon="compareCardInfo[0].icon"
         :bgColor="compareCardInfo[0].bgColor" :cmpText="compareCardInfo[0].cmpText" />
-      <CompareCard :title="compareCardInfo[1].title" :formattedData="`${Object.keys(appUsage!).length} ${t('dashboard.cmp-card.1.unit')}`"
+      <CompareCard :title="compareCardInfo[1].title"
+        :formattedData="`${Object.keys(appUsage!).length} ${t('dashboard.cmp-card.1.unit')}`"
         :cmpData="[cmpCardData[1][0], cmpCardData[1][1]]" :icon="compareCardInfo[1].icon"
         :bgColor="compareCardInfo[1].bgColor" :cmpText="compareCardInfo[1].cmpText" />
       <CompareCard :title="compareCardInfo[2].title" :formattedData="format_seconds(getWeekDataAvg(dailyUsage!))"
@@ -226,8 +227,8 @@ const dailyUsageReady = ref<Boolean>(false);
         <div class="flex justify-between items-center mb-4">
           <h3 class="font-semibold">{{ t(chartTitle.dailyUsage) }}</h3>
           <div class="flex space-x-2">
-            <button v-for="(label, key) in periodText" :key="key" class="px-2 py-1 text-xs rounded transition-colors"
-              @click="period = key" :class="[
+            <button v-for="(label, key) in periodText" :key="key"
+              class="px-2 py-1 text-xs rounded transition-colors font-bold" @click="period = key" :class="[
                 period === key
                   ? 'bg-primary/20 text-primary cursor-default'
                   : 'bg-dark-100 hover:bg-dark-100/70 cursor-pointer'

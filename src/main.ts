@@ -14,7 +14,8 @@ import './style/base.css'
 import { createI18n } from 'vue-i18n'
 import zh from '@/locales/zh.json'
 import en from '@/locales/en.json'
-const savedLang = localStorage.getItem('app_language') || 'en';
+const setting = localStorage.getItem('setting');
+const savedLang = setting ? JSON.parse(setting).lang : 'en';
 const i18n = createI18n({
     legacy: false,
     locale: savedLang,

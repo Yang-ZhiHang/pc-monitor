@@ -20,10 +20,10 @@ export const periodText: Record<PeriodType, string> = {
     [Period.YEARLY]: 'dashboard.period.year'
 };
 
-export const periodLabel: Record<PeriodType, string[]> = {
-    [Period.WEEKLY]: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-    [Period.MONTHLY]: ['1日', '5日', '10日', '15日', '20日', '25日', '30日'],
-    [Period.YEARLY]: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+export const periodLabelKey: Record<PeriodType, string[]> = {
+    [Period.WEEKLY]: ['week.mon', 'week.tue', 'week.wed', 'week.thu', 'week.fri', 'week.sat', 'week.sun'],
+    [Period.MONTHLY]: ['week.0', 'week.1', 'week.2', 'week.3', 'week.4'],
+    [Period.YEARLY]: ['month.jan', 'month.feb', 'month.mar', 'month.apr', 'month.may', 'month.jun', 'month.jul', 'month.aug', 'month.sep', 'month.oct', 'month.nov', 'month.dec']
 };
 
 export const compareCardInfo: Array<{ title: string; icon: string; bgColor: string; cmpText: string }> = [

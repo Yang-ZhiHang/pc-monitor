@@ -15,7 +15,10 @@ use core::task::register_event_listener;
 use core::task::register_scheduled_task;
 use utils::autostart::set_start_on_boot_rs;
 use utils::db::{init_db, insert};
-use utils::window::current_window;
+use utils::window::{
+    current_window, window_close, window_minimize, window_start_drag, window_toggle_always_on_top,
+    window_toggle_maximize,
+};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -44,10 +47,10 @@ pub fn run() {
         register_event_listener("move_click", move |evt: Event| match evt.event_type {
             EventType::ButtonRelease(_) | EventType::KeyRelease(_) => {
                 let cw = current_window();
-                println!("Current window: {}", cw);
                 if pre_cw == cw || IGNORE_APP_LIST.contains(&cw.as_str()) {
                     return;
                 }
+                println!("Current window: {}", cw);
                 pre_cw = cw.clone();
                 let time_stamp = chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
                 let params = params![&time_stamp, &cw];
@@ -63,6 +66,11 @@ pub fn run() {
             get_app_usage_duration_rs,
             get_recall_usage_duration_rs,
             set_start_on_boot_rs,
+            window_close,
+            window_minimize,
+            window_toggle_always_on_top,
+            window_toggle_maximize,
+            window_start_drag
         ])
         .setup(|app| {
             let _tray = TrayIconBuilder::new()

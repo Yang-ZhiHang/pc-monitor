@@ -15,7 +15,7 @@
         "title": "pc-usage-statistics",
         "width": 1000,
         "height": 700,
-        "decorations": true
+        "decorations": false
       }
     ],
     "security": {

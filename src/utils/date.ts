@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { periodLabel, Period } from '@/constants/dashboard';
+import { periodLabelKey, Period } from '@/constants/dashboard';
 
 // ===== week
 
@@ -21,8 +21,8 @@ const getWeekDays = (sub: number = 0): string[] => {
     return weekDates;
 }
 
-export const getWeekLabels = (): string[] => {
-    return periodLabel[Period.WEEKLY];
+export const getWeekLabelKey = (): string[] => {
+    return periodLabelKey[Period.WEEKLY];
 }
 
 export const getWeekData = (dataset: Record<string, number>, sub: number = 0): number[] => {
@@ -68,9 +68,8 @@ const getMonthWeekGroups = (): string[][] => {
     return weeks;
 }
 
-export const getMonthWeekLabels = () => {
-    const weeks = getMonthWeekGroups();
-    return weeks.map((_, i) => `第${i + 1}周`);
+export const getMonthWeekLabelKey = (): string[] => {
+    return periodLabelKey[Period.MONTHLY];
 }
 
 export const getMonthWeekData = (dataset: Record<string, number>) => {
@@ -103,8 +102,8 @@ const getYearMonthGroups = (): string[][] => {
     return months;
 }
 
-export const getYearMonthLabels = (): string[] => {
-    return periodLabel[Period.YEARLY];
+export const getYearMonthLabelKey = (): string[] => {
+    return periodLabelKey[Period.YEARLY];
 }
 
 export const getYearMonthData = (dataset: Record<string, number>): number[] => {

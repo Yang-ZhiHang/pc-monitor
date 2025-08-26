@@ -6,6 +6,7 @@ import { ref } from 'vue';
 import Dashboard from './components/dashboard/index.vue';
 import ExportReport from './components/ExportReport.vue';
 import Settings from './components/Settings.vue';
+import WindowCtrls from "./components/WindowCtrls.vue";
 import { navItems } from './constants/nav';
 
 const currentRoute = ref<string>('dashboard');
@@ -38,7 +39,8 @@ const switchView = (view: string) => {
     </div>
 
     <!-- Main Area - Component Switching -->
-    <main class="flex-1 overflow-auto relative">
+    <main class="flex-1 overflow-hidden relative">
+      <WindowCtrls />
       <Dashboard v-if="currentRoute === `${navItems[0].route}`" />
       <ExportReport v-if="currentRoute === `${navItems[1].route}`" @export-success="showExportSuccess = true" />
       <Settings v-if="currentRoute === `${navItems[2].route}`" />

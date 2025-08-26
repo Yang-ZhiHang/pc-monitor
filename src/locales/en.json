@@ -7,9 +7,9 @@
     },
     "dashboard": {
         "period": {
-            "week": "week",
-            "month": "month",
-            "year": "year"
+            "week": "W",
+            "month": "M",
+            "year": "Y"
         },
         "cmp-card": {
             "0": {
@@ -63,5 +63,33 @@
         },
         "save": "Save"
     },
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "week": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat",
+        "sun": "Sun",
+        "0": "Week1",
+        "1": "Week2",
+        "2": "Week3",
+        "3": "Week4",
+        "4": "Week5"
+    },
+    "month": {
+        "jan": "Jan",
+        "feb": "Feb",
+        "mar": "Mar",
+        "apr": "Apr",
+        "may": "May",
+        "jun": "Jun",
+        "jul": "Jul",
+        "aug": "Aug",
+        "sep": "Sep",
+        "oct": "Oct",
+        "nov": "Nov",
+        "dec": "Dec"
+    }
 }

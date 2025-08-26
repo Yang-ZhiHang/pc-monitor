@@ -8,7 +8,7 @@ const settingStore = useSettingStore();
 </script>
 
 <template>
-  <div class="min-h-min p-6 animate-fade">
+  <div class="min-h-min p-6 animate-fade overflow-auto">
     <div class="h-full w-full min-w-xl mx-auto bg-dark-200 rounded-md p-6 card-shadow">
       <h2 class="text-xl font-semibold mb-6 text-light-300">{{ t('setting.title') }}</h2>
 

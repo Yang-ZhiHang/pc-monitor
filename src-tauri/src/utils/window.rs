@@ -1,6 +1,7 @@
 use log::debug;
 use std::path::Path;
 use sysinfo::{Pid, System};
+use tauri::Window;
 
 #[cfg(target_os = "windows")]
 /// Get the window which is focused currently.
@@ -46,7 +47,7 @@ pub fn current_window() -> String {
 ///
 /// ```ignore
 /// use super::*;
-/// 
+///
 /// let path = Path::new(r"D:\app\Microsoft VS Code\Code.exe");
 /// let friendly_name = friendly_name_from_exe(path);
 /// assert_eq!(friendly_name.unwrap_or_default(), "Visual Studio Code");
@@ -139,4 +140,34 @@ fn friendly_name_from_exe(exe: &Path) -> Option<String> {
                 .into(),
         );
     }
+}
+
+#[tauri::command]
+pub fn window_minimize(window: Window) {
+    let _ = window.minimize();
+}
+
+#[tauri::command]
+pub fn window_toggle_maximize(window: Window) {
+    if window.is_maximized().unwrap_or(false) {
+        let _ = window.unmaximize();
+    } else {
+        let _ = window.maximize();
+    }
+}
+
+#[tauri::command]
+pub fn window_toggle_always_on_top(window: Window) {
+    let is_always_on_top = window.is_always_on_top().unwrap_or(false);
+    let _ = window.set_always_on_top(!is_always_on_top);
+}
+
+#[tauri::command]
+pub fn window_close(window: Window) {
+    let _ = window.close();
+}
+
+#[tauri::command]
+pub fn window_start_drag(window: Window) {
+    let _ = window.start_dragging();
 }
