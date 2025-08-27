@@ -28,18 +28,18 @@ const startDrag = (e: MouseEvent) => {
 
 <template>
     <div class="flex items-center justify-end bg-dark-300 px-2 py-1 select-none gap-2" @mousedown="startDrag">
-        <button @click="toggleAlwaysOnTop" :class="['ctrl-btn', isAlwaysOnTop ? 'text-blue-500' : '']">
+        <button @click="toggleAlwaysOnTop" :class="isAlwaysOnTop ? 'text-blue-500' : ''">
             <i class="fa fa-thumbtack text-current pointer-events-none"></i>
         </button>
-        <button @click="minimize" class="ctrl-btn">
+        <button @click="minimize">
             <i class="fa-solid fa-minus pointer-events-none"></i>
         </button>
-        <button @click="toggleMaximize" class="ctrl-btn">
+        <button @click="toggleMaximize">
             <i v-if="!isMaximized" class="fa-regular fa-square pointer-events-none"></i>
             <i v-else class="fa-regular fa-clone pointer-events-none"></i>
         </button>
-        <button @click="close" class="ctrl-btn close-btn">
-            <i class="fa-solid fa-xmark pointer-events-none"></i>
+        <button @click="close" class="btn-close">
+            <i class=" fa-solid fa-xmark pointer-events-none"></i>
         </button>
     </div>
 </template>
@@ -57,6 +57,12 @@ button {
 
     &:hover {
         background-color: #ffffff25;
+    }
+}
+
+.btn-close {
+    &:hover {
+        background-color: rgba(255, 1, 1, 0.386);
     }
 }
 </style>

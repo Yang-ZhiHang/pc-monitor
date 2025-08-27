@@ -1,8 +1,9 @@
-use crate::constants::TABLE;
+use crate::constants::db::TABLE;
+use crate::logging;
 use crate::utils::db::init_db;
+use crate::utils::logging::Type;
 use crate::utils::test::jsonify;
 use chrono::{Duration, Local, NaiveDate, TimeZone, Utc};
-use log::debug;
 use rusqlite::{Connection, params};
 use std::collections::HashMap;
 
@@ -86,7 +87,13 @@ pub fn get_app_usage_duration(
         pre_time = Some(cur_time);
         pre_name = Some(cur_name);
     }
-    debug!("Total app usage duration: {}", jsonify(&result));
+    logging!(
+        debug,
+        Type::Statistics,
+        false,
+        "Total app usage duration: {}",
+        jsonify(&result)
+    );
     Ok(result)
 }
 
@@ -115,7 +122,7 @@ fn get_daily_usage_duration(conn: &Connection) -> Result<i64, rusqlite::Error> {
 fn get_local_day_start_end_in_utc(local_date: NaiveDate) -> (String, String) {
     let local_start = local_date.and_hms_opt(0, 0, 0).unwrap();
     let local_end = local_date.and_hms_opt(23, 59, 59).unwrap();
-    // 转为 UTC
+    // Convert to UTC
     let utc_start = Local
         .from_local_datetime(&local_start)
         .unwrap()
@@ -126,7 +133,14 @@ fn get_local_day_start_end_in_utc(local_date: NaiveDate) -> (String, String) {
         .with_timezone(&Utc);
     let start_of_day = utc_start.format("%Y-%m-%d %H:%M:%S").to_string();
     let end_of_day = utc_end.format("%Y-%m-%d %H:%M:%S").to_string();
-    debug!("Query range from {} to {}", start_of_day, end_of_day);
+    logging!(
+        debug,
+        Type::Statistics,
+        false,
+        "Query range from {} to {}",
+        start_of_day,
+        end_of_day
+    );
     (start_of_day, end_of_day)
 }
 
@@ -178,7 +192,13 @@ pub fn get_recall_usage_duration_rs(n: i64) -> Result<HashMap<String, i64>, Stri
             .map_err(|e| format!("Row get error: {}", e))?;
         result.insert(date, duration);
     }
-    debug!("Recall daily usage: {}", jsonify(&result));
+    logging!(
+        debug,
+        Type::Statistics,
+        false,
+        "Recall daily usage: {}",
+        jsonify(&result)
+    );
     Ok(result)
 }
 

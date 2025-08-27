@@ -6,24 +6,103 @@ use tauri::tray::TrayIconBuilder;
 mod constants;
 mod core;
 mod utils;
-use constants::{IGNORE_APP_LIST, TABLE};
+use constants::db::TABLE;
+use constants::window::IGNORE_APP_LIST;
+use core::report::export_report;
 use core::stats::{
     get_app_usage_duration_rs, get_recall_usage_duration_rs, update_daily_app_usage,
     update_daily_usage_stats,
 };
 use core::task::register_event_listener;
 use core::task::register_scheduled_task;
+use parking_lot::Mutex;
+use tauri::AppHandle;
 use utils::autostart::set_start_on_boot_rs;
 use utils::db::{init_db, insert};
+use utils::logging::Type;
 use utils::window::{
     current_window, window_close, window_minimize, window_start_drag, window_toggle_always_on_top,
     window_toggle_maximize,
 };
 
+pub struct AppHandleManager {
+    handle: Mutex<Option<AppHandle>>,
+}
+
+impl AppHandleManager {
+    pub fn new() -> Self {
+        Self {
+            handle: Mutex::new(None),
+        }
+    }
+
+    pub fn init(&self, handle: AppHandle) {
+        let mut app_handler = self.handle.lock();
+        if app_handler.is_none() {
+            *app_handler = Some(handle);
+            logging!(
+                debug,
+                Type::Setup,
+                "{} initialized with app handle.",
+                stringify!(Self)
+            );
+        }
+    }
+
+    /// Get the app handle
+    pub fn get(&self) -> Option<AppHandle> {
+        self.handle.lock().clone()
+    }
+}
+
+// Global single instance
+singleton_with_logging!(AppHandleManager, INSTANCE);
+
+mod app_init {
+    use super::*;
+
+    pub fn setup_plugins(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wry> {
+        builder
+            .plugin(tauri_plugin_dialog::init())
+            .plugin(tauri_plugin_opener::init())
+    }
+
+    pub fn generate_handlers()
+    -> impl Fn(tauri::ipc::Invoke<tauri::Wry>) -> bool + Send + Sync + 'static {
+        tauri::generate_handler![
+            // Dashboard statistics
+            get_app_usage_duration_rs,
+            get_recall_usage_duration_rs,
+            // Settings
+            set_start_on_boot_rs,
+            // Export
+            export_report,
+            // Window event
+            window_close,
+            window_minimize,
+            window_toggle_always_on_top,
+            window_toggle_maximize,
+            window_start_drag,
+        ]
+    }
+
+    pub fn setup_tray_icon(
+        app: &tauri::App,
+    ) -> Result<tauri::tray::TrayIcon, Box<dyn std::error::Error>> {
+        let _tray = TrayIconBuilder::new()
+            .icon(app.default_window_icon().unwrap().clone())
+            .build(app)?;
+        Ok(_tray)
+    }
+
+    pub fn init_core(app_handle: &AppHandle) {
+        let app_handle = app_handle.clone();
+        AppHandleManager::global().init(app_handle);
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // env_logger::init();
-
     // The thread where scheduled tasks and event listening run
     thread::spawn(|| {
         use tokio::time::Duration;
@@ -60,24 +139,28 @@ pub fn run() {
         });
     });
 
-    tauri::Builder::default()
-        .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![
-            get_app_usage_duration_rs,
-            get_recall_usage_duration_rs,
-            set_start_on_boot_rs,
-            window_close,
-            window_minimize,
-            window_toggle_always_on_top,
-            window_toggle_maximize,
-            window_start_drag
-        ])
+    let builder = app_init::setup_plugins(tauri::Builder::default())
+        .invoke_handler(app_init::generate_handlers())
         .setup(|app| {
-            let _tray = TrayIconBuilder::new()
-                .icon(app.default_window_icon().unwrap().clone())
-                .build(app)?;
+            let _tray = app_init::setup_tray_icon(app).expect("Error setting up tray icon");
+            let app_handle = app.handle().clone();
+            app_init::init_core(&app_handle);
             Ok(())
-        })
-        .run(tauri::generate_context!())
+        });
+
+    let app = builder
+        .build(tauri::generate_context!())
         .expect("error while running tauri application");
+
+    app.run(|_app_handle, _event| {
+        // match _event {
+        //     tauri::RunEvent::ExitRequested { api, .. } => {
+        //         api.prevent_exit();
+        //         let app_handle = _app_handle.clone();
+        //         let window = app_handle.get_window("main").unwrap();
+        //         window.hide().unwrap();
+        //     }
+        //     _ => {}
+        // }
+    });
 }

@@ -3,10 +3,11 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 import { ref } from 'vue';
 import { ElDatePicker } from 'element-plus';
+import { invoke } from '@tauri-apps/api/core';
 
 // 日期状态
-const startDate = ref('2023-06-01');
-const endDate = ref('2023-06-30');
+const startDate = ref('2025-08-01');
+const endDate = ref('2025-08-30');
 
 // 导出选项
 const exportOptions = ref({
@@ -20,13 +21,18 @@ const exportFormat = ref('html');
 
 // 处理导出
 const handleExport = () => {
-  // 这里可以添加导出逻辑
-  console.log('导出数据:', {
+  // 构造参数
+  const types: Array<'appUsage' | 'webHistory' | 'durationStats'> = [];
+  if (exportOptions.value.appUsage) types.push('appUsage');
+  if (exportOptions.value.webHistory) types.push('webHistory');
+  if (exportOptions.value.durationStats) types.push('durationStats');
+
+  invoke('export_report', {
     startDate: startDate.value,
     endDate: endDate.value,
-    options: exportOptions.value,
+    types,
     format: exportFormat.value
-  });
+  })
 };
 </script>
 
@@ -41,25 +47,13 @@ const handleExport = () => {
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="text-xs text-light-300 mb-1 block">{{ t('export.date-range.start') }}</label>
-              <el-date-picker
-                v-model="startDate"
-                type="date"
-                format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
-                class="w-full"
-                popper-class="bg-dark-200 text-light-400"
-              />
+              <el-date-picker v-model="startDate" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD"
+                class="w-full" popper-class="bg-dark-200 text-light-400" />
             </div>
             <div>
               <label class="text-xs text-light-300 mb-1 block">{{ t('export.date-range.end') }}</label>
-              <el-date-picker
-                v-model="endDate"
-                type="date"
-                format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
-                class="w-full"
-                popper-class="bg-dark-200 text-light-400"
-              />
+              <el-date-picker v-model="endDate" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD" class="w-full"
+                popper-class="bg-dark-200 text-light-400" />
             </div>
           </div>
         </div>

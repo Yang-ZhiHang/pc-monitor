@@ -1,4 +1,4 @@
-use crate::constants::{DB_NAME, TABLE};
+use crate::constants::db::{DB_NAME, TABLE};
 use rusqlite::Connection;
 
 /// Initialize the database and create necessary tables.

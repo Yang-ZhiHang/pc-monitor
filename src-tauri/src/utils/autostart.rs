@@ -1,5 +1,6 @@
-use crate::constants::APP_NAME;
-use log::debug;
+use crate::constants::window::APP_NAME;
+use crate::logging;
+use crate::utils::logging::Type;
 use std::env;
 use winreg::{RegKey, enums::*};
 
@@ -11,7 +12,13 @@ pub fn set_start_on_boot(enable: bool) -> Result<(), Box<dyn std::error::Error>>
         "Software\\Microsoft\\Windows\\CurrentVersion\\Run",
         KEY_WRITE,
     )?;
-    debug!("Setting start on boot to {}", enable);
+    logging!(
+        debug,
+        Type::Autostart,
+        false,
+        "Setting start on boot to {}",
+        enable
+    );
     if enable {
         run.set_value(APP_NAME, &exe_path)?;
     } else {

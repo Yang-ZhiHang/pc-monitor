@@ -1,5 +1,6 @@
+use crate::logging;
+use crate::utils::logging::Type;
 use chrono::{Duration as ChronoDuration, Local, Timelike};
-use log::debug;
 use rdev::{Event, listen};
 use std::sync::LazyLock;
 use tokio::runtime::Runtime;
@@ -14,7 +15,7 @@ where
     RT.spawn(async move {
         let mut itv = interval(duration);
         loop {
-            debug!("{} executed.", id);
+            logging!(debug, Type::Task, false, "{} executed.", id);
             task();
             itv.tick().await;
         }
@@ -56,14 +57,14 @@ where
         let wait_time = (next_run - now).num_seconds() as u64;
         sleep(Duration::from_secs(wait_time)).await;
 
-        debug!("{} executed.", id);
+        logging!(debug, Type::Task, false, "{} executed.", id);
         task();
 
         // Schedule the task to run every 24 hours
         let mut itv = interval(Duration::from_secs(wait_time));
         loop {
             itv.tick().await;
-            debug!("{} executed.", id);
+            logging!(debug, Type::Task, false, "{} executed.", id);
             task();
         }
     });
@@ -80,6 +81,6 @@ fn test_run_daily_task() {
             Local::now().second(),
         )
         .unwrap();
-    debug!("Current time: {}", current_time);
-    debug!("Target time: {}", target_time);
+    logging!(debug, Type::Task, false, "Current time: {}", current_time);
+    logging!(debug, Type::Task, false, "Target time: {}", target_time);
 }
