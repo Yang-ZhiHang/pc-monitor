@@ -1,3 +1,4 @@
+use chrono::Utc;
 use rdev::{Event, EventType};
 use rusqlite::params;
 use std::thread;
@@ -7,7 +8,7 @@ mod constants;
 mod core;
 mod utils;
 use constants::db::TABLE;
-use constants::window::IGNORE_APP_LIST;
+use constants::window::{IGNORE_APP_LIST, WindowEvent};
 use core::report::export_report;
 use core::stats::{
     get_app_usage_duration_rs, get_recall_usage_duration_rs, update_daily_app_usage,
@@ -125,13 +126,17 @@ pub fn run() {
         let mut pre_cw: String = "".to_string();
         register_event_listener("move_click", move |evt: Event| match evt.event_type {
             EventType::ButtonRelease(_) | EventType::KeyRelease(_) => {
+                // TO-DO: The calc algorithm is not right
                 let cw = current_window();
-                if pre_cw == cw || IGNORE_APP_LIST.contains(&cw.as_str()) {
+                if pre_cw == cw {
+                    return;
+                };
+                logging!(debug, Type::Window, "Current window: {}", cw);
+                pre_cw = cw.clone();
+                if IGNORE_APP_LIST.contains(&cw.as_str()) {
                     return;
                 }
-                println!("Current window: {}", cw);
-                pre_cw = cw.clone();
-                let time_stamp = chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
+                let time_stamp = Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
                 let params = params![&time_stamp, &cw];
                 insert(TABLE::APP_USAGE_LOGS, params).expect("Error inserting app usage log");
             }
@@ -154,14 +159,23 @@ pub fn run() {
         .expect("error while running tauri application");
 
     app.run(|_app_handle, _event| {
-        // match _event {
-        //     tauri::RunEvent::ExitRequested { api, .. } => {
-        //         api.prevent_exit();
-        //         let app_handle = _app_handle.clone();
-        //         let window = app_handle.get_window("main").unwrap();
-        //         window.hide().unwrap();
-        //     }
-        //     _ => {}
-        // }
+        match _event {
+            tauri::RunEvent::ExitRequested { api, .. } => {
+                // api.prevent_exit();
+                let time_stamp = Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
+                let params = params![&time_stamp, WindowEvent::EXITED];
+                if let Err(e) = insert(TABLE::APP_USAGE_LOGS, params) {
+                    eprintln!("Error inserting close log: {}", e);
+                }
+                logging!(
+                    debug,
+                    Type::Exit,
+                    "App usage log inserted: [{} - {}]",
+                    time_stamp,
+                    WindowEvent::EXITED
+                );
+            }
+            _ => {}
+        }
     });
 }

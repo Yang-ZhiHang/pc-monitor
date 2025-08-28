@@ -1,8 +1,9 @@
-use crate::constants::db::TABLE;
+use crate::constants::window::WindowEvent;
 use crate::logging;
 use crate::utils::db::init_db;
 use crate::utils::logging::Type;
 use crate::utils::test::jsonify;
+use crate::{constants::db::TABLE, utils::logging};
 use chrono::{Duration, Local, NaiveDate, TimeZone, Utc};
 use rusqlite::{Connection, params};
 use std::collections::HashMap;
@@ -60,12 +61,26 @@ pub fn get_app_usage_duration(
     // Get the first row as 'pre'
     let mut pre_time: Option<String> = None;
     let mut pre_name: Option<String> = None;
-    if let Some(row) = rows.next()? {
+    while let Some(row) = rows.next()? {
         pre_time = Some(row.get::<_, String>(1)?);
         pre_name = Some(row.get::<_, String>(2)?);
-    }
-    if pre_name.is_none() {
-        return Ok(HashMap::new());
+        logging!(
+            debug,
+            Type::Statistics,
+            false,
+            "First log entry: time = {}, app = {}",
+            pre_time.as_ref().unwrap(),
+            pre_name.as_ref().unwrap()
+        );
+        if pre_name.is_none() {
+            return Ok(HashMap::new());
+        }
+        if pre_name.as_ref().unwrap() == WindowEvent::LOCKED
+            || pre_name.as_ref().unwrap() == WindowEvent::EXITED
+        {
+            continue;
+        }
+        break;
     }
 
     // TO-DO: if PC is sleepping, the duration may not be recorded
@@ -78,6 +93,16 @@ pub fn get_app_usage_duration(
             chrono::NaiveDateTime::parse_from_str(&pre_time.as_ref().unwrap(), "%Y-%m-%d %H:%M:%S"),
             chrono::NaiveDateTime::parse_from_str(&cur_time, "%Y-%m-%d %H:%M:%S"),
         ) {
+            logging!(
+                debug,
+                Type::Statistics,
+                false,
+                "Comparing log entries: pre = {} - {}, cur = {} - {}",
+                pre_time.as_ref().unwrap(),
+                pre_name.as_ref().unwrap(),
+                cur_time,
+                cur_name
+            );
             let duration = cur_dt.signed_duration_since(pre_dt).num_seconds();
             result
                 .entry(pre_name.as_ref().unwrap().clone())

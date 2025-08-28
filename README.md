@@ -9,13 +9,13 @@ An app for monitoring and visualizing your PC's usage metrics over time.
 
 ## Next plan
 
-- [ ] Title bar + Github link
+- [x] Title bar + Github link
 - [ ] Customizable usage tracking frequency
 - [ ] A more user-friendly export panel
     - [ ] modular panel: Export fmt、data summary、fast choice for date range
 - [ ] Refactor main dashboard
     - [ ] App usage rank
-    - [ ] 「Total this week」 -> 「Total usage today」
+    - [ ] [Total this week] -> [Total usage today]
 
 ## Tech Stacks
 

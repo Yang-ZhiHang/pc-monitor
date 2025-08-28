@@ -3,6 +3,7 @@ use std::fmt;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Type {
     Setup,
+    Exit,
     Statistics,
     Task,
     Autostart,
@@ -14,6 +15,7 @@ impl fmt::Display for Type {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Type::Setup => write!(f, "[Setup]"),
+            Type::Exit => write!(f, "[Exit]"),
             Type::Statistics => write!(f, "[Statistics]"),
             Type::Task => write!(f, "[Task]"),
             Type::Autostart => write!(f, "[Autostart]"),
