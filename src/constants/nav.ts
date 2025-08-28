@@ -1,13 +1,16 @@
 type navItem = {
-    label: string;
-    icon: string;
-    route: string;
+  label: string;
+  detail: string;
+  icon: string;
+  route: string;
 }
 
 export const title = "PUS";
 
 export const navItems: navItem[] = ([
-  { label: 'nav.overview', icon: 'chart-line', route: 'dashboard' },
-  { label: 'nav.export', icon: 'download', route: 'export' },
-  { label: 'nav.setting', icon: 'cog', route: 'settings' }
+  { label: 'nav.overview', detail: 'nav.detail.overview', icon: 'chart-line', route: 'dashboard' },
+  { label: 'nav.export', detail: 'nav.detail.export', icon: 'download', route: 'export' },
+  { label: 'nav.setting', detail: 'nav.detail.setting', icon: 'cog', route: 'settings' }
 ]);
+
+export const githubLink = "https://github.com/Yang-ZhiHang/pc-monitor";

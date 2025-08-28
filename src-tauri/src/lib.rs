@@ -139,14 +139,15 @@ pub fn run() {
         });
     });
 
-    let builder = app_init::setup_plugins(tauri::Builder::default())
-        .invoke_handler(app_init::generate_handlers())
-        .setup(|app| {
-            let _tray = app_init::setup_tray_icon(app).expect("Error setting up tray icon");
-            let app_handle = app.handle().clone();
-            app_init::init_core(&app_handle);
-            Ok(())
-        });
+    let builder =
+        app_init::setup_plugins(tauri::Builder::default().plugin(tauri_plugin_shell::init()))
+            .invoke_handler(app_init::generate_handlers())
+            .setup(|app| {
+                let _tray = app_init::setup_tray_icon(app).expect("Error setting up tray icon");
+                let app_handle = app.handle().clone();
+                app_init::init_core(&app_handle);
+                Ok(())
+            });
 
     let app = builder
         .build(tauri::generate_context!())

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 import { ref, watch } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import { invoke } from '@tauri-apps/api/core';
@@ -20,6 +20,7 @@ let doughnutData = ref<Object | null>(null);
 let doughnutOptions = ref<Object | null>(null);
 
 function initDoughnutData(dataset: Record<string, number>, k: number = 4) {
+  if (dataset.length === 0) return;
   doughnutData.value = {
     labels: Object.keys(dataset).slice(0, k),
     datasets: [{
@@ -222,7 +223,7 @@ const dailyUsageReady = ref<Boolean>(false);
     </div>
 
     <!-- Chart Area -->
-    <div class="grid grid-cols-3 gap-3 h-[calc(100%-12rem)] text-light-300">
+    <div class="grid grid-cols-3 gap-3 text-light-300">
       <div class="bg-dark-200 rounded-md p-5 card-shadow col-span-2 flex flex-col">
         <div class="flex justify-between items-center mb-4">
           <h3 class="font-semibold">{{ t(chartTitle.dailyUsage) }}</h3>
@@ -236,7 +237,6 @@ const dailyUsageReady = ref<Boolean>(false);
           </div>
         </div>
         <div class="flex-1 flex items-center justify-center">
-          <!-- <canvas id="dailyUsageChart" class="w-full h-full"></canvas> -->
           <BarChart v-if="barData && barOptions" :data="barData" :options="barOptions" />
         </div>
       </div>
@@ -244,7 +244,6 @@ const dailyUsageReady = ref<Boolean>(false);
       <div class="bg-dark-200 rounded-md p-5 card-shadow flex flex-col">
         <h3 class="font-semibold mb-4">{{ t(chartTitle.appUsage) }}</h3>
         <div class="flex-1 flex items-center justify-center">
-          <!-- <canvas id="appUsageChart" class="w-full h-full max-w-[300px] max-h-[300px]"></canvas> -->
           <DoughnutChart v-if="doughnutData && doughnutOptions" :data="doughnutData" :options="doughnutOptions" />
           <div v-else class="w-full h-full flex items-center justify-center">
             <p class="text-light-400">{{ t('dashboard.no-data') }}</p>

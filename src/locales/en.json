@@ -3,7 +3,12 @@
     "nav": {
         "overview": "Overview",
         "export": "Export",
-        "setting": "Setting"
+        "setting": "Setting",
+        "detail": {
+            "overview": "Overview",
+            "export": "Export Data",
+            "setting": "Setting"
+        }
     },
     "dashboard": {
         "period": {

@@ -3,7 +3,12 @@
     "nav": {
         "overview": "概览",
         "export": "导出",
-        "setting": "设置"
+        "setting": "设置",
+        "detail": {
+            "overview": "概览",
+            "export": "导出数据",
+            "setting": "设置"
+        }
     },
     "dashboard": {
         "period": {

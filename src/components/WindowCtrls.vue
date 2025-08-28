@@ -1,6 +1,11 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, toRefs } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
+import { navItems, githubLink } from '@/constants/nav';
+import { useI18n } from 'vue-i18n';
+import { open } from '@tauri-apps/plugin-shell';
+
+const { t } = useI18n();
 
 const isMaximized = ref<Boolean>(false);
 const toggleMaximize = async () => {
@@ -24,31 +29,60 @@ const startDrag = (e: MouseEvent) => {
         invoke('window_start_drag');
     }
 }
+
+const props = defineProps({
+    currentRoute: {
+        type: String,
+        required: true
+    }
+});
+
+const { currentRoute } = toRefs(props);
+
+const getTitle = (): string => {
+    for (const item of navItems) {
+        if (item.route === currentRoute.value) {
+            return item.detail;
+        }
+    }
+    return '';
+}
 </script>
 
 <template>
-    <div class="flex items-center justify-end bg-dark-300 px-2 py-1 select-none gap-2" @mousedown="startDrag">
-        <button @click="toggleAlwaysOnTop" :class="isAlwaysOnTop ? 'text-blue-500' : ''">
-            <i class="fa fa-thumbtack text-current pointer-events-none"></i>
-        </button>
-        <button @click="minimize">
-            <i class="fa-solid fa-minus pointer-events-none"></i>
-        </button>
-        <button @click="toggleMaximize">
-            <i v-if="!isMaximized" class="fa-regular fa-square pointer-events-none"></i>
-            <i v-else class="fa-regular fa-clone pointer-events-none"></i>
-        </button>
-        <button @click="close" class="btn-close">
-            <i class=" fa-solid fa-xmark pointer-events-none"></i>
-        </button>
+    <div class="flex flex-col items-center justify-between bg-dark-400 px-2 py-1 select-none gap-2 border-b border-dark-200"
+        @mousedown="startDrag">
+        <div class="flex justify-end w-full">
+            <button @click="toggleAlwaysOnTop" :class="isAlwaysOnTop ? 'text-blue-500' : ''">
+                <i class="fa fa-thumbtack text-current"></i>
+            </button>
+            <button @click="minimize">
+                <i class="fa-solid fa-minus"></i>
+            </button>
+            <button @click="toggleMaximize">
+                <i v-if="!isMaximized" class="fa-regular fa-square"></i>
+                <i v-else class="fa-regular fa-clone"></i>
+            </button>
+            <button @click="close" class="btn-close">
+                <i class=" fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="flex items-center justify-between w-full pl-4 pr-2">
+            <h1 class="text-xl font-bold w-max shrink-0">{{ t(getTitle()) }}</h1>
+            <div class="flex justify-end w-full">
+                <button @click="() => open(githubLink)" class="rounded-full! p-1" title="Github Project Website">
+                    <i class="fa-brands fa-github text-2xl aspect-square flex! items-center justify-center"></i>
+                </button>
+            </div>
+        </div>
     </div>
 </template>
 
 <style scoped>
 button {
     font-size: 1rem;
-    width: 2rem;
-    height: 2rem;
+    min-width: 2rem;
+    aspect-ratio: 1/1;
     border: none;
     border-radius: 3px;
     background: transparent;
@@ -57,6 +91,10 @@ button {
 
     &:hover {
         background-color: #ffffff25;
+    }
+
+    i {
+        pointer-events: none;
     }
 }
 

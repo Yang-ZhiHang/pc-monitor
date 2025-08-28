@@ -30,7 +30,6 @@ pub fn export_report(
     for t in types {
         match t.as_str() {
             "appUsage" => {
-                // 查询 appUsage
                 let sql = format!(
                     "SELECT app_name, total_usage, date FROM {} WHERE date BETWEEN ? AND ?",
                     TABLE::DAILY_APP_USAGE
@@ -78,35 +77,95 @@ pub fn export_report(
             }
         }
         ExportFmt::HTML => {
-            let mut html = String::from("<html><body>");
-            for (key, arr) in &result {
-                html += &format!("<h3>{}</h3><table border='1'><tr>", key);
+            if let Some(arr) = result.get("appUsage") {
                 let arr = arr.as_array().unwrap();
-                if !arr.is_empty() {
-                    let headers: Vec<_> = arr[0].as_object().unwrap().keys().cloned().collect();
-                    html += &headers
-                        .iter()
-                        .map(|h| format!("<th>{}</th>", h))
-                        .collect::<String>();
-                    html += "</tr>";
-                    for obj in arr {
-                        html += "<tr>";
-                        html += &headers
-                            .iter()
-                            .map(|h| {
-                                format!(
-                                    "<td>{}</td>",
-                                    obj.get(h).map_or("", |v| v.as_str().unwrap_or(""))
-                                )
-                            })
-                            .collect::<String>();
-                        html += "</tr>";
-                    }
+                // 构造 x 轴（日期），y 轴（使用时长），系列（应用名）
+                let mut dates = vec![];
+                let mut app_map = std::collections::BTreeMap::new();
+                for obj in arr {
+                    let app = obj["app_name"].as_str().unwrap_or("");
+                    let date = obj["date"].as_str().unwrap_or("");
+                    let usage = obj["total_usage"].as_i64().unwrap_or(0);
+                    dates.push(date.to_string());
+                    app_map
+                        .entry(app.to_string())
+                        .or_insert_with(Vec::new)
+                        .push((date.to_string(), usage));
                 }
-                html += "</table>";
+                dates.sort();
+                dates.dedup();
+
+                // 构造 series
+                let mut series = vec![];
+                for (app, usage_vec) in app_map {
+                    // 按日期补齐数据
+                    let mut data = vec![];
+                    for d in &dates {
+                        let mut found = false;
+                        for (date, usage) in &usage_vec {
+                            if date == d {
+                                data.push(*usage);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if !found {
+                            data.push(0);
+                        }
+                    }
+                    series.push(json!({
+                        "name": app,
+                        "type": "bar",
+                        "stack": "total",
+                        "data": data
+                    }));
+                }
+
+                // 生成 HTML
+                let html = format!(
+                    r#"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>应用使用统计图表</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+</head>
+<body>
+    <h2>应用使用统计（{start} ~ {end}）</h2>
+    <div id="main" style="width: 1000px;height:600px;"></div>
+    <script>
+        var chartDom = document.getElementById('main');
+        var myChart = echarts.init(chartDom);
+        var option = {{
+            tooltip: {{
+                trigger: 'axis',
+                axisPointer: {{ type: 'shadow' }}
+            }},
+            legend: {{ }},
+            xAxis: {{
+                type: 'category',
+                data: {dates}
+            }},
+            yAxis: {{
+                type: 'value'
+            }},
+            series: {series}
+        }};
+        myChart.setOption(option);
+    </script>
+</body>
+</html>
+"#,
+                    start = start_date,
+                    end = end_date,
+                    dates = serde_json::to_string(&dates).unwrap(),
+                    series = serde_json::to_string(&series).unwrap()
+                );
+                content = html;
+            } else {
+                content = "<html><body><h3>无数据</h3></body></html>".to_string();
             }
-            html += "</body></html>";
-            content = html;
         }
         _ => {
             return Err("Unsupported format".to_string());
