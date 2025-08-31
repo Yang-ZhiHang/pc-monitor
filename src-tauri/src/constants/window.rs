@@ -7,14 +7,18 @@ impl WindowEvent {
     pub const LOCKED: &str = "LockApp.exe";
 }
 
-pub const IGNORE_APP_LIST: &[&str] = &[
+pub const W_IGNORE_APP_LIST: &[&str] = &[
     "Windows Shell Experience Host",
     "Windows Start Experience Host",
-    // "LockApp.exe",
-    // "Windows 资源管理器",
-    // "Windows Explorer",
-    // "任务管理器",
-    // "TaskManager",
     "Microsoft Edge WebView2",
+];
+
+pub const R_IGNORE_APP_LIST: &[&str] = &[
+    "LockApp.exe",
+    "Windows 资源管理器",
+    "Windows Explorer",
+    "任务管理器",
+    "TaskManager",
+    WindowEvent::LOCKED,
     WindowEvent::EXITED,
 ];

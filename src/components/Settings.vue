@@ -1,10 +1,16 @@
 <script lang="ts" setup>
+import { watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 import { ElSelect, ElOption } from 'element-plus';
 import { useSettingStore } from '@/stores/setting';
+import { invoke } from '@tauri-apps/api/core';
 
 const settingStore = useSettingStore();
+
+watch(() => settingStore.startOnBoot, (newVal) => {
+  invoke<void>('set_start_on_boot_rs', { enable: newVal });
+});
 </script>
 
 <template>
@@ -20,8 +26,8 @@ const settingStore = useSettingStore();
           </h3>
           <div class="pl-6">
             <el-select v-model="settingStore.lang" class="w-full" size="large">
-              <el-option label="简体中文" value="zh" @click="settingStore.switchLang('zh')"/>
-              <el-option label="English" value="en" @click="settingStore.switchLang('en')"/>
+              <el-option label="简体中文" value="zh" @click="settingStore.switchLang('zh')" />
+              <el-option label="English" value="en" @click="settingStore.switchLang('en')" />
             </el-select>
           </div>
         </div>
@@ -36,6 +42,15 @@ const settingStore = useSettingStore();
               <span class="text-sm">{{ t('setting.system-setting.0') }}</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" v-model="settingStore.startOnBoot" class="sr-only peer">
+                <div
+                  class="w-11 h-6 bg-dark-100 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary">
+                </div>
+              </label>
+            </label>
+            <label class="flex items-center justify-between">
+              <span class="text-sm">{{ t('setting.system-setting.1') }}</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" v-model="settingStore.minToTray" class="sr-only peer">
                 <div
                   class="w-11 h-6 bg-dark-100 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary">
                 </div>

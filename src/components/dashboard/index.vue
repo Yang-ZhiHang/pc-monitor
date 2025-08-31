@@ -63,12 +63,10 @@ function initDoughnutOptions() {
 
 const appUsage = ref<Record<string, number> | null>(null);
 // localDate { string } 'yyyy-mm-dd'
-invoke("get_app_usage_duration_rs", { localDate: getCurrentDate() }).then(_ => {
+invoke<Record<string, number>>("get_app_usage_duration_rs", { localDate: getCurrentDate() }).then(_ => {
   console.log("(appUsage) invoke executing");
   appUsage.value = Object.fromEntries(
-    Object
-      .entries(_ as Record<string, number>)
-      .sort(([, a], [, b]) => b - a)
+    Object.entries(_).sort(([, a], [, b]) => b - a)
   );
   console.log("App usage duration:", appUsage.value);
   initDoughnutData(appUsage.value, 4);
@@ -80,9 +78,9 @@ invoke("get_app_usage_duration_rs", { localDate: getCurrentDate() }).then(_ => {
   console.error("Error fetching app usage duration:", error);
 });
 
-invoke("get_app_usage_duration_rs", { localDate: getCurrentDate(1) }).then(_ => {
+invoke<Record<string, number>>("get_app_usage_duration_rs", { localDate: getCurrentDate(1) }).then(_ => {
   console.log("(appUsage_yesterday) invoke executing");
-  cmpCardData.value[1][1] = Object.keys(_ as Record<string, number>).length;
+  cmpCardData.value[1][1] = Object.keys(_).length;
   appUsageReady.value = true;
   console.log("(appUsage_yesterday) invoke executed");
 }).catch((error) => {
@@ -170,13 +168,10 @@ function initBarOptions() {
 }
 
 const dailyUsage = ref<Record<string, number> | null>(null);
-invoke("get_recall_usage_duration_rs", { n: 365 }).then(_ => {
+invoke<Record<string, number>>("get_recall_usage_duration_rs", { n: 365 }).then(_ => {
   console.log("(dailyUsage) invoke executing");
   const result = Object.fromEntries(
-    Object
-      .keys(_ as Record<string, number>)
-      .sort()
-      .map(key => [key, (_ as Record<string, number>)[key]])
+    Object.keys(_).sort().map(key => [key, (_)[key]])
   );
   dailyUsage.value = result;
   console.log("Daily usage duration:", result);

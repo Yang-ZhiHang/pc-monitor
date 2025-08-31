@@ -4,29 +4,31 @@ import { invoke } from '@tauri-apps/api/core'
 import { navItems, githubLink } from '@/constants/nav';
 import { useI18n } from 'vue-i18n';
 import { open } from '@tauri-apps/plugin-shell';
+import { useSettingStore } from '@/stores/setting';
 
+const settingStore = useSettingStore();
 const { t } = useI18n();
 
 const isMaximized = ref<Boolean>(false);
 const toggleMaximize = async () => {
     isMaximized.value = !isMaximized.value;
-    await invoke('window_toggle_maximize')
+    await invoke<void>('window_toggle_maximize')
 }
 
-const minimize = () => invoke('window_minimize')
+const minimize = () => invoke<void>('window_minimize')
 
 const isAlwaysOnTop = ref<Boolean>(false);
 const toggleAlwaysOnTop = async () => {
     isAlwaysOnTop.value = !isAlwaysOnTop.value;
-    await invoke('window_toggle_always_on_top', { is_always_on_top: isAlwaysOnTop.value })
+    await invoke<void>('window_toggle_always_on_top', { is_always_on_top: isAlwaysOnTop.value })
 }
 
-const close = () => invoke('window_close');
+const close = () => invoke<void>('window_close', { hide: settingStore.minToTray });
 
 const startDrag = (e: MouseEvent) => {
     // Prevent drag if the target is a button (minimize、maximize or close)
     if ((e.target as HTMLElement).tagName !== 'BUTTON') {
-        invoke('window_start_drag');
+        invoke<void>('window_start_drag');
     }
 }
 

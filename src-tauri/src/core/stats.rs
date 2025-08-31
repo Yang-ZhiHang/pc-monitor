@@ -1,9 +1,9 @@
-use crate::constants::window::WindowEvent;
+use crate::constants::db::TABLE;
+use crate::constants::window::{R_IGNORE_APP_LIST, WindowEvent};
 use crate::logging;
 use crate::utils::db::init_db;
 use crate::utils::logging::Type;
 use crate::utils::test::jsonify;
-use crate::{constants::db::TABLE, utils::logging};
 use chrono::{Duration, Local, NaiveDate, TimeZone, Utc};
 use rusqlite::{Connection, params};
 use std::collections::HashMap;
@@ -72,14 +72,17 @@ pub fn get_app_usage_duration(
             pre_time.as_ref().unwrap(),
             pre_name.as_ref().unwrap()
         );
+
+        // In the case that the result of query is none
         if pre_name.is_none() {
             return Ok(HashMap::new());
         }
-        if pre_name.as_ref().unwrap() == WindowEvent::LOCKED
-            || pre_name.as_ref().unwrap() == WindowEvent::EXITED
-        {
+
+        // Don't display applications which R_IGNORE_APP_LIST contains
+        if R_IGNORE_APP_LIST.contains(&pre_name.as_ref().unwrap().as_str()) {
             continue;
         }
+
         break;
     }
 
@@ -89,6 +92,13 @@ pub fn get_app_usage_duration(
     while let Some(row) = rows.next()? {
         let cur_time = row.get::<_, String>(1)?;
         let cur_name = row.get::<_, String>(2)?;
+
+        if R_IGNORE_APP_LIST.contains(&pre_name.as_ref().unwrap().as_str()) {
+            pre_time = Some(cur_time);
+            pre_name = Some(cur_name);
+            continue;
+        }
+
         if let (Ok(pre_dt), Ok(cur_dt)) = (
             chrono::NaiveDateTime::parse_from_str(&pre_time.as_ref().unwrap(), "%Y-%m-%d %H:%M:%S"),
             chrono::NaiveDateTime::parse_from_str(&cur_time, "%Y-%m-%d %H:%M:%S"),

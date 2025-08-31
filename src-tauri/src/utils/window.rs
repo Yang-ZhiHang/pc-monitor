@@ -1,8 +1,9 @@
+use crate::AppHandleManager;
 use crate::logging;
 use crate::utils::logging::Type;
 use std::path::Path;
 use sysinfo::{Pid, System};
-use tauri::Window;
+use tauri::Manager;
 
 #[cfg(target_os = "windows")]
 /// Get the window which is focused currently.
@@ -170,31 +171,151 @@ fn friendly_name_from_exe(exe: &Path) -> Option<String> {
 }
 
 #[tauri::command]
-pub fn window_minimize(window: Window) {
-    let _ = window.minimize();
+pub fn window_minimize() -> bool {
+    WindowManager::minimize()
 }
 
 #[tauri::command]
-pub fn window_toggle_maximize(window: Window) {
-    if window.is_maximized().unwrap_or(false) {
-        let _ = window.unmaximize();
-    } else {
-        let _ = window.maximize();
+pub fn window_toggle_maximize() -> bool {
+    WindowManager::toggle_maximize()
+}
+
+#[tauri::command]
+pub fn window_toggle_always_on_top() -> bool {
+    WindowManager::toggle_always_on_top()
+}
+
+#[tauri::command]
+pub fn window_close(hide: bool) {
+    match WindowManager::get_main_window() {
+        Some(window) => {
+            if hide {
+                match window.hide() {
+                    Ok(_) => {
+                        logging!(info, Type::Window, true, "Window is now hidden.");
+                    }
+                    Err(e) => {
+                        logging!(error, Type::Window, true, "Hide window failed: {}", e);
+                    }
+                }
+            } else {
+                match window.close() {
+                    Ok(_) => {
+                        logging!(info, Type::Window, true, "Window closed.");
+                    }
+                    Err(e) => {
+                        logging!(error, Type::Window, true, "Close window failed: {}", e);
+                    }
+                }
+            }
+        }
+        None => {
+            logging!(
+                info,
+                Type::Window,
+                true,
+                "Window does not exist, no need to close"
+            );
+        }
     }
 }
 
 #[tauri::command]
-pub fn window_toggle_always_on_top(window: Window) {
-    let is_always_on_top = window.is_always_on_top().unwrap_or(false);
-    let _ = window.set_always_on_top(!is_always_on_top);
+pub fn window_start_drag() -> bool {
+    match WindowManager::get_main_window() {
+        Some(window) => match window.start_dragging() {
+            Ok(_) => {
+                logging!(info, Type::Window, true, "Window drag started.");
+                true
+            }
+            Err(e) => {
+                logging!(warn, Type::Window, true, "Start drag failed: {}", e);
+                false
+            }
+        },
+        None => {
+            logging!(
+                info,
+                Type::Window,
+                true,
+                "Window does not exist, no need to start drag"
+            );
+            false
+        }
+    }
 }
 
-#[tauri::command]
-pub fn window_close(window: Window) {
-    let _ = window.close();
-}
+pub struct WindowManager;
 
-#[tauri::command]
-pub fn window_start_drag(window: Window) {
-    let _ = window.start_dragging();
+impl WindowManager {
+    pub fn get_main_window() -> Option<tauri::WebviewWindow<tauri::Wry>> {
+        AppHandleManager::global()
+            .get()
+            .and_then(|app_handle| app_handle.get_webview_window("main"))
+    }
+
+    pub fn minimize() -> bool {
+        match Self::get_main_window() {
+            Some(window) => match window.is_minimized() {
+                Ok(_) => {
+                    let _ = window.minimize();
+                    true
+                }
+                Err(e) => {
+                    logging!(error, Type::Window, true, "Window minimize failed: {}", e);
+                    false
+                }
+            },
+            None => {
+                logging!(warn, Type::Window, true, "Main window does not exist.");
+                false
+            }
+        }
+    }
+
+    pub fn toggle_maximize() -> bool {
+        match Self::get_main_window() {
+            Some(window) => match window.is_maximized() {
+                Ok(is_maximized) => {
+                    if is_maximized {
+                        let _ = window.unmaximize();
+                    } else {
+                        let _ = window.maximize();
+                    }
+                    true
+                }
+                Err(e) => {
+                    logging!(error, Type::Window, true, "Window minimize failed: {}", e);
+                    false
+                }
+            },
+            None => {
+                logging!(warn, Type::Window, true, "Main window does not exist.");
+                false
+            }
+        }
+    }
+
+    pub fn toggle_always_on_top() -> bool {
+        match Self::get_main_window() {
+            Some(window) => match window.is_always_on_top() {
+                Ok(is_always_on_top) => {
+                    if is_always_on_top {
+                        let _ = window.set_always_on_top(false);
+                    } else {
+                        let _ = window.set_always_on_top(true);
+                    }
+                    true
+                }
+                Err(e) => {
+                    logging!(error, Type::Window, true, "Window operation failed: {}", e);
+                    false
+                }
+            },
+            None => {
+                logging!(warn, Type::Window, true, "Main window does not exist.");
+                false
+            }
+        }
+    }
 }

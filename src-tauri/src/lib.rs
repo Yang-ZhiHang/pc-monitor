@@ -2,13 +2,16 @@ use chrono::Utc;
 use rdev::{Event, EventType};
 use rusqlite::params;
 use std::thread;
-use tauri::tray::TrayIconBuilder;
+use tauri::{
+    menu::{Menu, MenuItem},
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+};
 
 mod constants;
 mod core;
 mod utils;
 use constants::db::TABLE;
-use constants::window::{IGNORE_APP_LIST, WindowEvent};
+use constants::window::{W_IGNORE_APP_LIST, WindowEvent};
 use core::report::export_report;
 use core::stats::{
     get_app_usage_duration_rs, get_recall_usage_duration_rs, update_daily_app_usage,
@@ -21,6 +24,7 @@ use tauri::AppHandle;
 use utils::autostart::set_start_on_boot_rs;
 use utils::db::{init_db, insert};
 use utils::logging::Type;
+use utils::window::WindowManager;
 use utils::window::{
     current_window, window_close, window_minimize, window_start_drag, window_toggle_always_on_top,
     window_toggle_maximize,
@@ -87,12 +91,52 @@ mod app_init {
         ]
     }
 
+    pub fn setup_menu_event(builder: TrayIconBuilder<tauri::Wry>) -> TrayIconBuilder<tauri::Wry> {
+        builder.on_menu_event(|app, event| match event.id.as_ref() {
+            "quit" => {
+                logging!(debug, Type::Exit, "Quit menu item clicked, exiting app.");
+                app.exit(0);
+            }
+            _ => {
+                logging!(debug, Type::Window, "menu item {:?} not handled", event.id);
+            }
+        })
+    }
+
+    pub fn setup_tray_icon_event(
+        builder: TrayIconBuilder<tauri::Wry>,
+    ) -> TrayIconBuilder<tauri::Wry> {
+        builder.on_tray_icon_event(|tray, event| match event {
+            TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } => {
+                logging!(debug, Type::Window, true, "Left click pressed and released");
+                if let Some(window) = WindowManager::get_main_window() {
+                    let _ = window.unminimize();
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                }
+            }
+            _ => {
+                logging!(debug, Type::Window, false, "Unhandled event {event:?}");
+            }
+        })
+    }
+
     pub fn setup_tray_icon(
         app: &tauri::App,
     ) -> Result<tauri::tray::TrayIcon, Box<dyn std::error::Error>> {
-        let _tray = TrayIconBuilder::new()
+        let quit_i = MenuItem::with_id(app, "quit", "Quit", true, Option::<&str>::None)?;
+        let menu = Menu::with_items(app, &[&quit_i])?;
+        let builder = TrayIconBuilder::new()
             .icon(app.default_window_icon().unwrap().clone())
-            .build(app)?;
+            .menu(&menu)
+            .show_menu_on_left_click(false);
+        let builder = setup_menu_event(builder);
+        let builder = setup_tray_icon_event(builder);
+        let _tray = builder.build(app)?;
         Ok(_tray)
     }
 
@@ -133,7 +177,7 @@ pub fn run() {
                 };
                 logging!(debug, Type::Window, "Current window: {}", cw);
                 pre_cw = cw.clone();
-                if IGNORE_APP_LIST.contains(&cw.as_str()) {
+                if W_IGNORE_APP_LIST.contains(&cw.as_str()) {
                     return;
                 }
                 let time_stamp = Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();

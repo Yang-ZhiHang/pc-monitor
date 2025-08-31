@@ -60,7 +60,8 @@
         },
         "system-setting": {
             "title": "System",
-            "0": "Auto-start upon startup"
+            "0": "Auto-start upon startup",
+            "1": "Minimize to the tray when closing"
         },
         "data-management": {
             "title": "Data Management",

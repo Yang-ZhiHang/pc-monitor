@@ -27,7 +27,7 @@ const handleExport = () => {
   if (exportOptions.value.webHistory) types.push('webHistory');
   if (exportOptions.value.durationStats) types.push('durationStats');
 
-  invoke('export_report', {
+  invoke<void>('export_report', {
     startDate: startDate.value,
     endDate: endDate.value,
     types,
