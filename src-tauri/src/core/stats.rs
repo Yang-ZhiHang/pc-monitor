@@ -1,10 +1,10 @@
 use crate::constants::db::TABLE;
-use crate::constants::window::{R_IGNORE_APP_LIST, WindowEvent};
+use crate::constants::window::R_IGNORE_APP_LIST;
 use crate::logging;
 use crate::utils::db::init_db;
 use crate::utils::logging::Type;
 use crate::utils::test::jsonify;
-use chrono::{Duration, Local, NaiveDate, TimeZone, Utc};
+use chrono::{Days, Local, NaiveDate, TimeZone, Utc};
 use rusqlite::{Connection, params};
 use std::collections::HashMap;
 
@@ -15,7 +15,7 @@ pub fn update_daily_app_usage(conn: &Connection) -> Result<(), rusqlite::Error> 
 
     // 2. Update usage duration for each app
     let local_today = Local::now().date_naive();
-    let usage_map = get_app_usage_duration(&conn, local_today)?;
+    let usage_map = collect_app_usage_duration(&conn, local_today)?;
     for (key, val) in &usage_map {
         let sql = format!(
             "INSERT INTO {} (date, app_name, total_usage) VALUES (?, ?, ?) ON CONFLICT(date, app_name) DO UPDATE SET total_usage = ?",
@@ -43,7 +43,7 @@ pub fn update_daily_usage_stats(conn: &Connection) -> Result<(), rusqlite::Error
 }
 
 /// Get all app usage durations that occurred today
-pub fn get_app_usage_duration(
+fn collect_app_usage_duration(
     conn: &Connection,
     local_date: NaiveDate,
 ) -> Result<HashMap<String, i64>, rusqlite::Error> {
@@ -132,8 +132,51 @@ pub fn get_app_usage_duration(
     Ok(result)
 }
 
+/// Get all app usage durations within specific range
+///
+/// ## Params
+///
+/// The date requires utc time
+fn get_app_usage_duration(
+    conn: &Connection,
+    start_date: NaiveDate,
+    end_date: NaiveDate,
+) -> Result<HashMap<String, HashMap<String, u64>>, rusqlite::Error> {
+    logging!(
+        debug,
+        Type::Statistics,
+        false,
+        "The time range from {} to {}",
+        start_date,
+        end_date
+    );
+
+    let sql = format!(
+        "SELECT * FROM {} WHERE date BETWEEN '{}' AND '{}'",
+        TABLE::DAILY_APP_USAGE,
+        start_date,
+        end_date
+    );
+    let mut stmt = conn.prepare(&sql)?;
+    let mut rows = stmt.query([])?;
+
+    let mut result: HashMap<String, HashMap<String, u64>> = HashMap::new();
+
+    while let Some(row) = rows.next()? {
+        let date = row.get::<_, String>(1)?;
+        let app_name = row.get::<_, String>(2)?;
+        let total_usage = row.get::<_, u64>(3)?;
+        result
+            .entry(date)
+            .or_insert_with(HashMap::new)
+            .insert(app_name, total_usage);
+    }
+
+    Ok(result)
+}
+
 /// Get all app usage durations that occurred today
-fn get_daily_usage_duration(conn: &Connection) -> Result<i64, rusqlite::Error> {
+fn get_daily_usage_duration(conn: &Connection) -> Result<u64, rusqlite::Error> {
     let local_today = get_local_date_in_utc();
 
     let sql = format!(
@@ -147,7 +190,7 @@ fn get_daily_usage_duration(conn: &Connection) -> Result<i64, rusqlite::Error> {
     // Summation
     let mut total_duration = 0;
     while let Some(row) = rows.next()? {
-        total_duration += row.get::<_, i64>(3)?;
+        total_duration += row.get::<_, u64>(3)?;
     }
 
     Ok(total_duration)
@@ -179,32 +222,47 @@ fn get_local_day_start_end_in_utc(local_date: NaiveDate) -> (String, String) {
     (start_of_day, end_of_day)
 }
 
-fn get_local_date_in_utc() -> String {
-    Utc::now().date_naive().to_string()
+fn get_local_date_in_utc() -> NaiveDate {
+    Utc::now().date_naive()
 }
 
 /// Obtain the date n days ago in UTC
-fn get_recall_date_in_utc(n: i64) -> String {
-    let utc_now = Utc::now();
-    let recall_date = utc_now.date_naive() - Duration::days(n);
-    recall_date.to_string()
+fn get_recall_date_in_utc(start: NaiveDate, n: u64) -> NaiveDate {
+    start - Days::new(n)
 }
 
 #[tauri::command]
-pub fn get_app_usage_duration_rs(local_date: String) -> Result<HashMap<String, i64>, String> {
-    use chrono::NaiveDate;
-    let conn = init_db().map_err(|e| format!("DB error: {}", e))?;
-    // convert yyyy-mm-dd String to NaiveDate
-    let local_date = NaiveDate::parse_from_str(&local_date, "%Y-%m-%d")
-        .map_err(|e| format!("Date parse error: {}", e))?;
-    get_app_usage_duration(&conn, local_date).map_err(|e| format!("Query error: {}", e))
+pub fn get_app_usage_duration_last_n_days(
+    n: u64,
+) -> Result<HashMap<String, HashMap<String, u64>>, String> {
+    let conn = init_db().expect("msg");
+    let now_date = Utc::now().date_naive();
+    let start_date = now_date - Days::new(n);
+    match get_app_usage_duration(&conn, start_date, now_date) {
+        Ok(mp) => Ok(mp),
+        Err(e) => Err(format!("Error occured: {}", e)),
+    }
 }
 
 #[tauri::command]
-pub fn get_recall_usage_duration_rs(n: i64) -> Result<HashMap<String, i64>, String> {
+pub fn get_app_usage_duration_range(
+    start_date: String,
+    end_date: String,
+) -> Result<HashMap<String, HashMap<String, u64>>, String> {
+    let conn = init_db().expect("msg");
+    let utc_start_date = NaiveDate::parse_from_str(&start_date, "%Y-%m-%d").unwrap();
+    let utc_end_date = NaiveDate::parse_from_str(&end_date, "%Y-%m-%d").unwrap();
+    match get_app_usage_duration(&conn, utc_start_date, utc_end_date) {
+        Ok(mp) => Ok(mp),
+        Err(e) => Err(format!("Error occured: {}", e)),
+    }
+}
+
+#[tauri::command]
+pub fn get_daily_usage_duration_last_n_days(n: u64) -> Result<HashMap<String, u64>, String> {
     let conn = init_db().map_err(|e| format!("DB error: {}", e))?;
     let local_date_in_utc = get_local_date_in_utc();
-    let start_date_in_utc = get_recall_date_in_utc(n);
+    let start_date_in_utc = get_recall_date_in_utc(local_date_in_utc, n);
     let sql = format!(
         "SELECT * FROM {} WHERE date BETWEEN '{}' AND '{}'",
         TABLE::DAILY_USAGE_STATS,
@@ -223,7 +281,7 @@ pub fn get_recall_usage_duration_rs(n: i64) -> Result<HashMap<String, i64>, Stri
             .get::<_, String>(1)
             .map_err(|e| format!("Row get error: {}", e))?;
         let duration = row
-            .get::<_, i64>(2)
+            .get::<_, u64>(2)
             .map_err(|e| format!("Row get error: {}", e))?;
         result.insert(date, duration);
     }
@@ -247,21 +305,27 @@ pub mod test {
     }
 
     #[test]
-    fn test_get_app_usage_duration() {
-        use crate::utils::db::init_db;
-        let conn = init_db().expect("Error initializing database");
-        update_daily_app_usage(&conn).expect("Error updating daily app usage");
+    pub fn test_get_app_usage_duration_last_n_days() {
+        let mp = get_app_usage_duration_last_n_days(7).expect("msg");
+        logging!(
+            debug,
+            Type::Statistics,
+            false,
+            "The get_app_usage_duration_last_n_days result is {}",
+            jsonify(&mp)
+        );
     }
 
     #[test]
-    fn test_get_daily_usage_duration() {
-        use crate::utils::db::init_db;
-        let conn = init_db().expect("Error initializing database");
-        update_daily_usage_stats(&conn).expect("Error updating daily usage");
-    }
-
-    #[test]
-    fn test_recall_daily_usage_duration() {
-        let _ = get_recall_usage_duration_rs(7);
+    pub fn test_get_app_usage_duration_range() {
+        let mp = get_app_usage_duration_range("2025-08-29".to_string(), "2025-9-02".to_string())
+            .expect("msg");
+        logging!(
+            debug,
+            Type::Statistics,
+            false,
+            "The get_app_usage_duration_range result is {}",
+            jsonify(&mp)
+        );
     }
 }

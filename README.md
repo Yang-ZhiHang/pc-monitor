@@ -16,6 +16,7 @@ An app for monitoring and visualizing your PC's usage metrics over time.
 - [ ] Refactor main dashboard
     - [ ] App usage rank
     - [ ] [Total this week] -> [Total usage today]
+- [ ] Singleton pattern needed in init_db()
 
 ## Tech Stacks
 

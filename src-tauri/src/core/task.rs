@@ -69,18 +69,3 @@ where
         }
     });
 }
-
-#[test]
-fn test_run_daily_task() {
-    let target_time = Local::now().date_naive().and_hms_opt(20, 0, 0).unwrap();
-    let current_time = Local::now()
-        .date_naive()
-        .and_hms_opt(
-            Local::now().hour(),
-            Local::now().minute(),
-            Local::now().second(),
-        )
-        .unwrap();
-    logging!(debug, Type::Task, false, "Current time: {}", current_time);
-    logging!(debug, Type::Task, false, "Target time: {}", target_time);
-}

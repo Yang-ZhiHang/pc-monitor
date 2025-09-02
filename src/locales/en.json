@@ -32,7 +32,7 @@
             }
         },
         "chart": {
-            "0": "PC usage duration / hour",
+            "0": "PC usage duration",
             "1": "Today's TOP4 app"
         },
         "no-data": "No data available"

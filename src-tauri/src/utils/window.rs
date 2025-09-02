@@ -201,7 +201,7 @@ pub fn window_close(hide: bool) {
             } else {
                 match window.close() {
                     Ok(_) => {
-                        logging!(info, Type::Window, true, "Window closed.");
+                        logging!(info, Type::Window, false, "Window closed.");
                     }
                     Err(e) => {
                         logging!(error, Type::Window, true, "Close window failed: {}", e);
@@ -225,7 +225,7 @@ pub fn window_start_drag() -> bool {
     match WindowManager::get_main_window() {
         Some(window) => match window.start_dragging() {
             Ok(_) => {
-                logging!(info, Type::Window, true, "Window drag started.");
+                logging!(info, Type::Window, false, "Window drag started.");
                 true
             }
             Err(e) => {
@@ -258,6 +258,7 @@ impl WindowManager {
         match Self::get_main_window() {
             Some(window) => match window.is_minimized() {
                 Ok(_) => {
+                    logging!(debug, Type::Window, false, "Window minimized");
                     let _ = window.minimize();
                     true
                 }
@@ -282,6 +283,7 @@ impl WindowManager {
                     } else {
                         let _ = window.maximize();
                     }
+                    logging!(debug, Type::Window, false, "Window maximize toggled.");
                     true
                 }
                 Err(e) => {

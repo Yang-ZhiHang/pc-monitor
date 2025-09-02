@@ -14,8 +14,8 @@ use constants::db::TABLE;
 use constants::window::{W_IGNORE_APP_LIST, WindowEvent};
 use core::report::export_report;
 use core::stats::{
-    get_app_usage_duration_rs, get_recall_usage_duration_rs, update_daily_app_usage,
-    update_daily_usage_stats,
+    get_app_usage_duration_last_n_days, get_app_usage_duration_range,
+    get_daily_usage_duration_last_n_days, update_daily_app_usage, update_daily_usage_stats,
 };
 use core::task::register_event_listener;
 use core::task::register_scheduled_task;
@@ -76,8 +76,9 @@ mod app_init {
     -> impl Fn(tauri::ipc::Invoke<tauri::Wry>) -> bool + Send + Sync + 'static {
         tauri::generate_handler![
             // Dashboard statistics
-            get_app_usage_duration_rs,
-            get_recall_usage_duration_rs,
+            get_app_usage_duration_last_n_days,
+            get_app_usage_duration_range,
+            get_daily_usage_duration_last_n_days,
             // Settings
             set_start_on_boot_rs,
             // Export

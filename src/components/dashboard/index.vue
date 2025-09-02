@@ -62,27 +62,21 @@ function initDoughnutOptions() {
 }
 
 const appUsage = ref<Record<string, number> | null>(null);
-// localDate { string } 'yyyy-mm-dd'
-invoke<Record<string, number>>("get_app_usage_duration_rs", { localDate: getCurrentDate() }).then(_ => {
+invoke<Record<string, Record<string, number>>>("get_app_usage_duration_last_n_days", { n: 1 }).then(_ => {
   console.log("(appUsage) invoke executing");
+  const today = _[getCurrentDate(0)] || {};
+  const yest = _[getCurrentDate(1)] || {};
   appUsage.value = Object.fromEntries(
-    Object.entries(_).sort(([, a], [, b]) => b - a)
+    Object.entries(today).sort(([, a], [, b]) => b - a)
   );
   console.log("App usage duration:", appUsage.value);
   initDoughnutData(appUsage.value, 4);
   initDoughnutOptions();
   // Obtain the length of appUsage
-  cmpCardData.value[1][0] = Object.keys(appUsage.value).length;
-  console.log("(appUsage) invoke executed");
-}).catch((error) => {
-  console.error("Error fetching app usage duration:", error);
-});
-
-invoke<Record<string, number>>("get_app_usage_duration_rs", { localDate: getCurrentDate(1) }).then(_ => {
-  console.log("(appUsage_yesterday) invoke executing");
-  cmpCardData.value[1][1] = Object.keys(_).length;
+  cmpCardData.value[1][0] = Object.keys(today).length;
+  cmpCardData.value[1][1] = Object.keys(yest).length;
   appUsageReady.value = true;
-  console.log("(appUsage_yesterday) invoke executed");
+  console.log("(appUsage) invoke executed");
 }).catch((error) => {
   console.error("Error fetching app usage duration:", error);
 });
@@ -111,7 +105,6 @@ function initBarData(dataset: Record<string, number>, p: PeriodType) {
       data = getYearMonthData(dataset);
       break;
   }
-
   barData.value = {
     labels,
     datasets: [{
@@ -151,6 +144,7 @@ function initBarOptions() {
           color: 'rgba(255, 255, 255, 0.7)',
           // seconds to hours
           callback: function (value: number) {
+            if (value < 3600) return Math.round(value / 60);
             return Math.round(value / 3600);
           }
         },
@@ -168,7 +162,7 @@ function initBarOptions() {
 }
 
 const dailyUsage = ref<Record<string, number> | null>(null);
-invoke<Record<string, number>>("get_recall_usage_duration_rs", { n: 365 }).then(_ => {
+invoke<Record<string, number>>("get_daily_usage_duration_last_n_days", { n: 365 }).then(_ => {
   console.log("(dailyUsage) invoke executing");
   const result = Object.fromEntries(
     Object.keys(_).sort().map(key => [key, (_)[key]])
