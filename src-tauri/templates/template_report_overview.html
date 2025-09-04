@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#8B5CF6',
+                        neutral: '#64748B',
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .report-container {
+                @apply max-w-7xl mx-auto p-4 md:p-8 bg-white shadow-lg rounded-lg;
+            }
+            .report-header {
+                @apply mb-8 pb-4 border-b border-gray-200;
+            }
+            .section-title {
+                @apply text-2xl font-bold text-gray-800 mb-4 flex items-center;
+            }
+            .section-icon {
+                @apply mr-2 text-primary;
+            }
+            .stat-card {
+                @apply bg-gray-50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow;
+            }
+            .chart-container {
+                @apply w-full h-80 mb-8;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 p-4 md:p-8">
+    <div class="report-container">
+        <!-- Report Header -->
+        <div class="report-header">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Data Analysis Report</h1>
+            <p class="text-neutral mt-2">Generated on: <span id="report-date">2023-06-15</span></p>
+        </div>
+
+        <!-- Key Metrics Overview -->
+        <section class="mb-10">
+            <h2 class="section-title">
+                <i class="fa fa-dashboard section-icon"></i>Key Metrics Overview
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="stat-card">
+                    <p class="text-neutral text-sm">Total Usage Time</p>
+                    <p class="text-3xl font-bold text-primary" id="total-count">0</p>
+                </div>
+                <div class="stat-card">
+                    <p class="text-neutral text-sm">Average Daily Usage</p>
+                    <p class="text-3xl font-bold text-secondary" id="average-value">0</p>
+                </div>
+                <div class="stat-card">
+                    <p class="text-neutral text-sm">Active Applications</p>
+                    <p class="text-3xl font-bold text-accent" id="max-value">0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trend Chart -->
+        <section class="mb-10">
+            <h2 class="section-title">
+                <i class="fa fa-line-chart section-icon"></i>Data Trend Analysis
+            </h2>
+            <div class="chart-container">
+                <canvas id="trend-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Data Distribution Chart -->
+        <section class="mb-10">
+            <h2 class="section-title">
+                <i class="fa fa-pie-chart section-icon"></i>Data Distribution
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="chart-container">
+                    <canvas id="distribution-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="comparison-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detailed Data Table -->
+        <section class="mb-10">
+            <h2 class="section-title">
+                <i class="fa fa-table section-icon"></i>Detailed Data
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600"
+                                id="table-header-1">Project</th>
+                            <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600"
+                                id="table-header-2">Value</th>
+                            <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600"
+                                id="table-header-3">Percentage</th>
+                            <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600"
+                                id="table-header-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table-body">
+                        <!-- Data rows will be dynamically inserted via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Report Footer -->
+        <div class="mt-10 pt-4 border-t border-gray-200 text-center text-neutral text-sm">
+            <p>PC-Monitor © 2025</p>
+        </div>
+    </div>
+    <script>
+        const data = {{ data | json_encode | safe }};
+
+        function format_seconds(secs) {
+            const hours = Math.floor(secs / 3600);
+            const minutes = Math.floor((secs % 3600) / 60);
+            const seconds = secs % 60;
+
+            if (hours > 0) {
+                return `${hours}h ${minutes}m ${seconds}s`;
+            } else if (minutes > 0) {
+                return `${minutes}m ${seconds}s`;
+            } else {
+                return `${seconds}s`;
+            }
+        }
+
+        // 1. Process monthly data (aggregate by month)
+        function getMonthlyData() {
+            const monthlyData = {};
+
+            // Fill in for 12 months
+            const today = new Date();
+            for (let i = 0; i < 12; i++) {
+                const d = new Date(today.getFullYear(), i, 1);
+                const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                if (!monthlyData[month]) monthlyData[month] = 0;
+            }
+
+            Object.entries(data).forEach(([date, apps]) => {
+                const month = date.substring(0, 7); // Get YYYY-MM
+                if (!monthlyData[month]) monthlyData[month] = 0;
+                // Accumulate the usage time of all applications for the day
+                monthlyData[month] += Object.values(apps).reduce((sum, time) => sum + time, 0);
+            });
+
+            return monthlyData;
+        }
+
+        // 2. Process weekly data (compare this week and last week)
+        function getWeeklyData() {
+            const now = new Date();
+            const thisWeekStart = new Date(now - now.getDay() * 24 * 60 * 60 * 1000);
+            const lastWeekStart = new Date(thisWeekStart - 7 * 24 * 60 * 60 * 1000);
+
+            const thisWeekData = {};
+            const lastWeekData = {};
+
+            Object.entries(data).forEach(([date, apps]) => {
+                const d = new Date(date);
+                if (d >= thisWeekStart) {
+                    // This week's data
+                    Object.entries(apps).forEach(([app, time]) => {
+                        if (!thisWeekData[app]) thisWeekData[app] = 0;
+                        thisWeekData[app] += time;
+                    });
+                } else if (d >= lastWeekStart && d < thisWeekStart) {
+                    // Last week's data
+                    Object.entries(apps).forEach(([app, time]) => {
+                        if (!lastWeekData[app]) lastWeekData[app] = 0;
+                        lastWeekData[app] += time;
+                    });
+                }
+            });
+
+            return { thisWeek: thisWeekData, lastWeek: lastWeekData };
+        }
+
+        // 3. Process total usage time (sort)
+        function getTotalUsage() {
+            const totalUsage = {};
+            Object.values(data).forEach(apps => {
+                Object.entries(apps).forEach(([app, time]) => {
+                    if (!totalUsage[app]) totalUsage[app] = 0;
+                    totalUsage[app] += time;
+                });
+            });
+
+            return Object.entries(totalUsage)
+                .filter(([app]) => app !== '' && app !== 'Idle') // Filter out empty values and Idle
+                .sort(([, a], [, b]) => b - a);
+        }
+
+        // Calculate key metrics
+        function getKeyMetrics() {
+            // 1. Total usage time
+            const totalUsageTime = Object.values(data).reduce((total, dayData) => {
+                return total + Object.values(dayData).reduce((sum, time) => sum + time, 0);
+            }, 0);
+
+            // 2. Active applications count (deduplicated)
+            const activeApps = new Set();
+            Object.values(data).forEach(dayData => {
+                Object.keys(dayData).forEach(app => {
+                    if (app && app !== 'Idle') {
+                        activeApps.add(app);
+                    }
+                });
+            });
+
+            // 3. Average daily usage time (only count days with usage records)
+            const activeDays = Object.values(data).filter(dayData =>
+                Object.values(dayData).reduce((sum, time) => sum + time, 0) > 0
+            ).length;
+            const avgDailyUsage = Math.floor(activeDays > 0 ? totalUsageTime / activeDays : 0);
+
+            return {
+                totalUsageTime,
+                activeAppsCount: activeApps.size,
+                avgDailyUsage
+            };
+        }
+
+        // Generate chart data
+        const monthlyData = getMonthlyData();
+        const weeklyData = getWeeklyData();
+        const totalUsage = getTotalUsage();
+        const metrics = getKeyMetrics();
+
+        // Fill in report date
+        document.getElementById('report-date').textContent = new Date().toLocaleDateString();
+
+        // Draw trend chart (monthly usage time)
+        const trendCtx = document.getElementById('trend-chart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: Object.keys(monthlyData),
+                datasets: [{
+                    label: 'Monthly Usage Time',
+                    data: Object.values(monthlyData),
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const value = context.dataset.data[context.dataIndex];
+                                return `${context.dataset.label}: ${format_seconds(value)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                if (value < 3600) return Math.round(value / 60);
+                                return Math.round(value / 3600);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Draw distribution chart (this week's app usage share)
+        const distributionCtx = document.getElementById('distribution-chart').getContext('2d');
+        const topApps = Object.entries(weeklyData.thisWeek)
+            .filter(([app]) => app !== '' && app !== 'Idle')
+            .sort(([, a], [, b]) => b - a)
+            .slice(0, 5); // Get top 5 apps
+
+        new Chart(distributionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: topApps.map(([app]) => app),
+                datasets: [{
+                    label: 'Usage Time',
+                    data: topApps.map(([, time]) => time),
+                    backgroundColor: [
+                        '#3B82F6',
+                        '#10B981',
+                        '#8B5CF6',
+                        '#F59E0B',
+                        '#EC4899'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const value = context.dataset.data[context.dataIndex];
+                                return `${context.dataset.label}: ${format_seconds(value)}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Draw comparison chart (this week vs last week)
+        const comparisonCtx = document.getElementById('comparison-chart').getContext('2d');
+        const comparisonApps = topApps.map(([app]) => app);
+        new Chart(comparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: comparisonApps,
+                datasets: [
+                    {
+                        label: 'This Week',
+                        data: comparisonApps.map(app => weeklyData.thisWeek[app] || 0),
+                        backgroundColor: '#3B82F6'
+                    },
+                    {
+                        label: 'Last Week',
+                        data: comparisonApps.map(app => weeklyData.lastWeek[app] || 0),
+                        backgroundColor: '#93C5FD'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const value = context.dataset.data[context.dataIndex];
+                                return `${context.dataset.label}: ${format_seconds(value)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                if (value < 3600) return Math.round(value / 60);
+                                return Math.round(value / 3600);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Update key metrics display
+        document.getElementById('total-count').textContent = format_seconds(metrics.totalUsageTime);
+        document.getElementById('average-value').textContent = format_seconds(metrics.avgDailyUsage);
+        document.getElementById('max-value').textContent = metrics.activeAppsCount;
+
+        // Fill in detailed data table
+        const tableBody = document.getElementById('data-table-body');
+        const total = totalUsage.reduce((sum, [, time]) => sum + time, 0);
+
+        totalUsage.forEach(([app, time]) => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50';
+            const percentage = ((time / total) * 100).toFixed(1);
+
+            row.innerHTML = `
+                <td class="py-3 px-4 border-b">${app}</td>
+                <td class="py-3 px-4 border-b">${format_seconds(time)}</td>
+                <td class="py-3 px-4 border-b">${percentage}%</td>
+                <td class="py-3 px-4 border-b">
+                    <span class="px-2 py-1 text-xs rounded-full ${time > total * 0.3
+                    ? 'bg-red-100 text-red-800'
+                    : time > total * 0.1
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-gray-100 text-gray-800'
+                }">
+                        ${time > total * 0.3 ? 'High Usage' : time > total * 0.1 ? 'Medium Usage' : 'Low Usage'}
+                    </span>
+                </td>
+            `;
+
+            tableBody.appendChild(row);
+        });
+    </script>
+</body>
+
+</html>

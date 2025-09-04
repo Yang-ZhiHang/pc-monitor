@@ -2,10 +2,10 @@
 import { ref, toRefs } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
 import { navItems, githubLink } from '@/constants/nav';
-import { useI18n } from 'vue-i18n';
 import { open } from '@tauri-apps/plugin-shell';
-import { useSettingStore } from '@/stores/setting';
 
+import { useI18n } from 'vue-i18n';
+import { useSettingStore } from '@/stores/setting';
 const settingStore = useSettingStore();
 const { t } = useI18n();
 
@@ -72,7 +72,7 @@ const getTitle = (): string => {
         <div class="flex items-center justify-between w-full pl-4 pr-2">
             <h1 class="text-xl font-bold w-max shrink-0">{{ t(getTitle()) }}</h1>
             <div class="flex justify-end w-full">
-                <button @click="() => open(githubLink)" class="rounded-full! p-1" title="Github Project Website">
+                <button @click="() => open(githubLink)" class="rounded-full! p-1" :title="t('nav.github')">
                     <i class="fa-brands fa-github text-2xl aspect-square flex! items-center justify-center"></i>
                 </button>
             </div>

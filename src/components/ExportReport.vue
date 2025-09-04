@@ -1,39 +1,70 @@
 <script lang="ts" setup>
-import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
 import { ref } from 'vue';
 import { ElDatePicker } from 'element-plus';
 import { invoke } from '@tauri-apps/api/core';
 
-// 日期状态
-const startDate = ref('2025-08-01');
-const endDate = ref('2025-08-30');
+import { useI18n } from 'vue-i18n';
+import { ElConfigProvider } from 'element-plus'
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
+import en from 'element-plus/es/locale/lang/en'
+import { useSettingStore } from '@/stores/setting';
 
-// 导出选项
-const exportOptions = ref({
-  appUsage: true,
-  webHistory: true,
-  durationStats: true,
-});
+const { t } = useI18n();
+const settingStore = useSettingStore();
 
-// 导出格式
+// [start, end]
+const dateRange = ref<[string, string]>([
+  new Date(new Date().setHours(0, 0, 0, 0)).toISOString().split('T')[0],
+  new Date(new Date().setHours(23, 59, 59, 999)).toISOString().split('T')[0]
+]);
+
+const size = ref<'default' | 'large' | 'small'>('large')
+
+// Default format
 const exportFormat = ref('html');
 
-// 处理导出
 const handleExport = () => {
-  // 构造参数
-  const types: Array<'appUsage' | 'webHistory' | 'durationStats'> = [];
-  if (exportOptions.value.appUsage) types.push('appUsage');
-  if (exportOptions.value.webHistory) types.push('webHistory');
-  if (exportOptions.value.durationStats) types.push('durationStats');
-
   invoke<void>('export_report', {
-    startDate: startDate.value,
-    endDate: endDate.value,
-    types,
+    startDate: dateRange.value[0],
+    endDate: dateRange.value[1],
     format: exportFormat.value
   })
 };
+
+const shortcuts = [
+  {
+    text: t('export.date-range.picker.today'),
+    value: new Date(),
+  },
+  {
+    text: t('export.date-range.picker.yesterday'),
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24)
+      return date
+    },
+  },
+  {
+    text: t('export.date-range.picker.last-week'),
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+      return date
+    },
+  },
+  {
+    text: t('export.date-range.picker.last-month'),
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 30)
+      return date
+    },
+  },
+]
+
+const disabledDate = (time: Date) => {
+  return time.getTime() > Date.now()
+}
 </script>
 
 <template>
@@ -45,32 +76,11 @@ const handleExport = () => {
         <div>
           <label class="block text-light-300 text-sm mb-2">{{ t('export.date-range.title') }}</label>
           <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="text-xs text-light-300 mb-1 block">{{ t('export.date-range.start') }}</label>
-              <el-date-picker v-model="startDate" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD"
-                class="w-full" popper-class="bg-dark-200 text-light-400" />
-            </div>
-            <div>
-              <label class="text-xs text-light-300 mb-1 block">{{ t('export.date-range.end') }}</label>
-              <el-date-picker v-model="endDate" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD" class="w-full"
-                popper-class="bg-dark-200 text-light-400" />
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-light-300 text-sm mb-2">{{ t('export.export-ctx.title') }}</label>
-          <div class="space-y-2 text-light-300">
-            <label class="flex items-center hover:bg-dark-100">
-              <input type="checkbox" v-model="exportOptions.appUsage"
-                class="rounded bg-dark-300 border-dark-100 text-primary focus:ring-primary cursor-pointer">
-              <span class="ml-2 text-sm">{{ t('export.export-ctx.0') }}</span>
-            </label>
-            <label class="flex items-center hover:bg-dark-100">
-              <input type="checkbox" v-model="exportOptions.durationStats"
-                class="rounded bg-dark-300 border-dark-100 text-primary focus:ring-primary cursor-pointer">
-              <span class="ml-2 text-sm">{{ t('export.export-ctx.1') }}</span>
-            </label>
+            <el-config-provider :locale="settingStore.lang == 'en' ? en : zhCn">
+                <el-date-picker v-model="dateRange" type="daterange" :start-placeholder="t('export.date-range.start')" :end-placeholder="t('export.date-range.end')"
+                  format="YYYY-MM-DD" value-format="YYYY-MM-DD" class="w-full" :shortcuts="shortcuts"
+                  :disabled-date="disabledDate" :size="size" popper-class="bg-dark-200 text-light-400" />
+            </el-config-provider>
           </div>
         </div>
 

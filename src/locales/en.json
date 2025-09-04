@@ -8,7 +8,8 @@
             "overview": "Overview",
             "export": "Export Data",
             "setting": "Setting"
-        }
+        },
+        "github": "GitHub Repository"
     },
     "dashboard": {
         "period": {
@@ -42,12 +43,14 @@
         "date-range": {
             "title": "Date range",
             "start": "start date",
-            "end": "end date"
-        },
-        "export-ctx": {
-            "title": "Content to be exported",
-            "0": "Daily app usage duration",
-            "1": "Daily PC usage duration"
+            "end": "end date",
+            "picker": {
+                "today": "Today",
+                "yesterday": "Yesterday",
+                "last-week": "Last week",
+                "last-month": "Last month",
+                "placeholder": "Pick a day"
+            }
         },
         "export-fmt": "Export format",
         "save": "Export data"

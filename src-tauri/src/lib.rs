@@ -158,7 +158,7 @@ pub fn run() {
                 let conn = init_db().expect("Error initializing database");
                 update_daily_app_usage(&conn).expect("Error updating daily app usage");
             },
-            Duration::from_secs(600),
+            Duration::from_secs(300),
         );
         register_scheduled_task(
             "update_daily_usage_stats",
