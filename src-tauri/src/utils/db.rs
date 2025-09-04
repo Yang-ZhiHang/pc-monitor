@@ -1,5 +1,27 @@
-use crate::constants::db::{DB_NAME, TABLE};
+use crate::{
+    constants::db::{DB_NAME, TABLE},
+    singleton_with_logging,
+};
+use parking_lot::Mutex;
 use rusqlite::Connection;
+
+pub struct DbManager {
+    pub handle: Mutex<Connection>,
+}
+
+impl DbManager {
+    pub fn new() -> Self {
+        Self {
+            handle: Mutex::new(init_db().expect("Failed to initialize database")),
+        }
+    }
+
+    pub fn get(&self) -> &Mutex<Connection> {
+        &self.handle
+    }
+}
+
+singleton_with_logging!(DbManager, DB_CONN);
 
 /// Initialize the database and create necessary tables.
 pub fn init_db() -> Result<Connection, rusqlite::Error> {
@@ -50,9 +72,11 @@ pub fn init_db() -> Result<Connection, rusqlite::Error> {
 ///
 /// let result = insert(TABLE::APP_USAGE_LOGS, &params);
 /// ```
-pub fn insert(table_name: &str, params: &[&dyn rusqlite::ToSql]) -> Result<(), rusqlite::Error> {
-    let conn = Connection::open(DB_NAME)?;
-
+pub fn insert(
+    conn: &Connection,
+    table_name: &str,
+    params: &[&dyn rusqlite::ToSql],
+) -> Result<(), rusqlite::Error> {
     let query = match table_name {
         TABLE::APP_USAGE_LOGS => "INSERT INTO app_usage_logs (time, app_name) VALUES (?, ?)",
         TABLE::DAILY_APP_USAGE => {

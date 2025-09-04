@@ -1,9 +1,8 @@
-use crate::constants::db::TABLE;
 use crate::constants::window::R_IGNORE_APP_LIST;
 use crate::logging;
-use crate::utils::db::init_db;
 use crate::utils::logging::Type;
 use crate::utils::test::jsonify;
+use crate::{constants::db::TABLE, utils::db::DbManager};
 use chrono::{Days, Local, NaiveDate, TimeZone, Utc};
 use rusqlite::{Connection, params};
 use std::collections::HashMap;
@@ -86,7 +85,7 @@ fn collect_app_usage_duration(
         break;
     }
 
-    // TO-DO: if PC is sleepping, the duration may not be recorded
+    // TO-DO: if PC is sleepping, the sleep event may not be recorded
     // Traverse from the second row onwards
     let mut result: HashMap<String, i64> = HashMap::new();
     while let Some(row) = rows.next()? {
@@ -166,6 +165,9 @@ fn get_app_usage_duration(
         let date = row.get::<_, String>(1)?;
         let app_name = row.get::<_, String>(2)?;
         let total_usage = row.get::<_, u64>(3)?;
+        if R_IGNORE_APP_LIST.contains(&app_name.as_str()) {
+            continue;
+        }
         result
             .entry(date)
             .or_insert_with(HashMap::new)
@@ -235,7 +237,7 @@ fn get_recall_date_in_utc(start: NaiveDate, n: u64) -> NaiveDate {
 pub fn get_app_usage_duration_last_n_days(
     n: u64,
 ) -> Result<HashMap<String, HashMap<String, u64>>, String> {
-    let conn = init_db().expect("msg");
+    let conn = DbManager::global().get().lock();
     let now_date = Utc::now().date_naive();
     let start_date = now_date - Days::new(n);
     match get_app_usage_duration(&conn, start_date, now_date) {
@@ -246,12 +248,12 @@ pub fn get_app_usage_duration_last_n_days(
 
 #[tauri::command]
 pub fn get_app_usage_duration_range(
-    start_date: String,
-    end_date: String,
+    start_date: &str,
+    end_date: &str,
 ) -> Result<HashMap<String, HashMap<String, u64>>, String> {
-    let conn = init_db().expect("msg");
-    let utc_start_date = NaiveDate::parse_from_str(&start_date, "%Y-%m-%d").unwrap();
-    let utc_end_date = NaiveDate::parse_from_str(&end_date, "%Y-%m-%d").unwrap();
+    let conn = DbManager::global().get().lock();
+    let utc_start_date = NaiveDate::parse_from_str(start_date, "%Y-%m-%d").unwrap();
+    let utc_end_date = NaiveDate::parse_from_str(end_date, "%Y-%m-%d").unwrap();
     match get_app_usage_duration(&conn, utc_start_date, utc_end_date) {
         Ok(mp) => Ok(mp),
         Err(e) => Err(format!("Error occured: {}", e)),
@@ -260,7 +262,7 @@ pub fn get_app_usage_duration_range(
 
 #[tauri::command]
 pub fn get_daily_usage_duration_last_n_days(n: u64) -> Result<HashMap<String, u64>, String> {
-    let conn = init_db().map_err(|e| format!("DB error: {}", e))?;
+    let conn = DbManager::global().get().lock();
     let local_date_in_utc = get_local_date_in_utc();
     let start_date_in_utc = get_recall_date_in_utc(local_date_in_utc, n);
     let sql = format!(
@@ -318,8 +320,7 @@ pub mod test {
 
     #[test]
     pub fn test_get_app_usage_duration_range() {
-        let mp = get_app_usage_duration_range("2025-08-29".to_string(), "2025-9-02".to_string())
-            .expect("msg");
+        let mp = get_app_usage_duration_range("2025-08-29", "2025-9-02").expect("msg");
         logging!(
             debug,
             Type::Statistics,

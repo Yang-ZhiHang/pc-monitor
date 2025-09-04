@@ -34,14 +34,14 @@ const handleExport = () => {
 const shortcuts = [
   {
     text: t('export.date-range.picker.today'),
-    value: new Date(),
+    value: [new Date(), new Date()],
   },
   {
     text: t('export.date-range.picker.yesterday'),
     value: () => {
       const date = new Date()
       date.setTime(date.getTime() - 3600 * 1000 * 24)
-      return date
+      return [date, new Date()]
     },
   },
   {
@@ -49,7 +49,7 @@ const shortcuts = [
     value: () => {
       const date = new Date()
       date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
-      return date
+      return [date, new Date()]
     },
   },
   {
@@ -57,7 +57,7 @@ const shortcuts = [
     value: () => {
       const date = new Date()
       date.setTime(date.getTime() - 3600 * 1000 * 24 * 30)
-      return date
+      return [date, new Date()]
     },
   },
 ]

@@ -1,7 +1,6 @@
 use crate::constants::report::ExportFmt;
 use crate::core::stats::get_app_usage_duration_range;
 use crate::logging;
-use crate::utils::db::init_db;
 use crate::utils::file::save_file_with_dialog;
 use crate::utils::logging::Type;
 use crate::utils::test::jsonify;
@@ -9,7 +8,7 @@ use std::fs;
 use tera::{Context, Tera};
 
 #[tauri::command]
-pub fn export_report(start_date: String, end_date: String, format: String) -> Result<(), String> {
+pub fn export_report(start_date: &str, end_date: &str, format: &str) -> Result<(), String> {
     logging!(
         debug,
         Type::Report,
@@ -19,12 +18,10 @@ pub fn export_report(start_date: String, end_date: String, format: String) -> Re
         end_date,
         format
     );
-    let data = get_app_usage_duration_range(start_date.clone(), end_date.clone())?;
+    let data = get_app_usage_duration_range(start_date, end_date)?;
 
-    let content = match format.as_str() {
-        ExportFmt::JSON => {
-            jsonify(&data)
-        }
+    let content = match format {
+        ExportFmt::JSON => jsonify(&data),
         ExportFmt::CSV => {
             let headers = vec!["date", "app_name", "duration"];
             let mut csv = headers.join(",") + "\n";
@@ -47,8 +44,7 @@ pub fn export_report(start_date: String, end_date: String, format: String) -> Re
             let mut payload = Context::new();
             payload.insert("data", &data);
 
-            tera
-                .render("report", &payload)
+            tera.render("report", &payload)
                 .map_err(|e| format!("Failed to render template: {}", e))?
         }
         _ => {
@@ -58,7 +54,7 @@ pub fn export_report(start_date: String, end_date: String, format: String) -> Re
 
     if let Err(e) = save_file_with_dialog(
         content.as_str(),
-        format.as_str(),
+        format,
         format!("export_{}_to_{}", start_date, end_date).as_str(),
     ) {
         return Err(e.to_string());

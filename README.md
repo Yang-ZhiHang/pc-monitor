@@ -10,9 +10,9 @@ An app for monitoring and visualizing your PC's usage metrics over time.
 ## Next plan
 
 - [x] Title bar + Github link
-- [ ] Add R_IGNORE_LIST in get_app_usage_duration_xxx
+- [x] Add R_IGNORE_LIST in get_app_usage_duration_xxx
+- [x] Singleton pattern needed in init_db()
 - [ ] Ensure the usage of &str and String, optimize the code
-- [ ] Singleton pattern needed in init_db()
 - [ ] Customizable usage tracking frequency
 - [ ] A more user-friendly export panel
     - [ ] modular panel: Export fmt、data summary、fast choice for date range

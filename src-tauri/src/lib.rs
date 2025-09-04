@@ -22,7 +22,7 @@ use core::task::register_scheduled_task;
 use parking_lot::Mutex;
 use tauri::AppHandle;
 use utils::autostart::set_start_on_boot_rs;
-use utils::db::{init_db, insert};
+use utils::db::{DbManager, init_db, insert};
 use utils::logging::Type;
 use utils::window::WindowManager;
 use utils::window::{
@@ -171,7 +171,6 @@ pub fn run() {
         let mut pre_cw: String = "".to_string();
         register_event_listener("move_click", move |evt: Event| match evt.event_type {
             EventType::ButtonRelease(_) | EventType::KeyRelease(_) => {
-                // TO-DO: The calc algorithm is not right
                 let cw = current_window();
                 if pre_cw == cw {
                     return;
@@ -183,7 +182,9 @@ pub fn run() {
                 }
                 let time_stamp = Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
                 let params = params![&time_stamp, &cw];
-                insert(TABLE::APP_USAGE_LOGS, params).expect("Error inserting app usage log");
+                let conn = DbManager::global().get().lock();
+                insert(&conn, TABLE::APP_USAGE_LOGS, params)
+                    .expect("Error inserting app usage log");
             }
             _ => {}
         });
@@ -209,7 +210,8 @@ pub fn run() {
                 // api.prevent_exit();
                 let time_stamp = Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
                 let params = params![&time_stamp, WindowEvent::EXITED];
-                if let Err(e) = insert(TABLE::APP_USAGE_LOGS, params) {
+                let conn = DbManager::global().get().lock();
+                if let Err(e) = insert(&conn, TABLE::APP_USAGE_LOGS, params) {
                     eprintln!("Error inserting close log: {}", e);
                 }
                 logging!(

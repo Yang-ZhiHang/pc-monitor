@@ -1,4 +1,5 @@
 {
     "css.lint.unknownAtRules": "ignore",
-    "workbench.activityBar.location": "top"
+    "workbench.activityBar.location": "top",
+    "html.validate.scripts": false
 }
