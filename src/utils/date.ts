@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
-import { periodLabelKey, Period } from '@/constants/dashboard';
+import { periodLabelKey } from '@/constants/dashboard';
+import { Period } from '@/types/dashboard';
 
 // ===== week
 

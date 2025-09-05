@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { ElDatePicker } from 'element-plus';
+import { ElDatePicker, ElMessage } from 'element-plus';
 import { invoke } from '@tauri-apps/api/core';
+import { ExportFormat } from '@/types/export';
 
 import { useI18n } from 'vue-i18n';
 import { ElConfigProvider } from 'element-plus'
@@ -21,13 +22,15 @@ const dateRange = ref<[string, string]>([
 const size = ref<'default' | 'large' | 'small'>('large')
 
 // Default format
-const exportFormat = ref('html');
+const exportFormat = ref<ExportFormat>(ExportFormat.HTML);
 
 const handleExport = () => {
   invoke<void>('export_report', {
     startDate: dateRange.value[0],
     endDate: dateRange.value[1],
     format: exportFormat.value
+  }).catch(err => {
+    ElMessage.error(`Export failed: ${err}`);
   })
 };
 
@@ -77,9 +80,10 @@ const disabledDate = (time: Date) => {
           <label class="block text-light-300 text-sm mb-2">{{ t('export.date-range.title') }}</label>
           <div class="grid grid-cols-2 gap-4">
             <el-config-provider :locale="settingStore.lang == 'en' ? en : zhCn">
-                <el-date-picker v-model="dateRange" type="daterange" :start-placeholder="t('export.date-range.start')" :end-placeholder="t('export.date-range.end')"
-                  format="YYYY-MM-DD" value-format="YYYY-MM-DD" class="w-full" :shortcuts="shortcuts"
-                  :disabled-date="disabledDate" :size="size" popper-class="bg-dark-200 text-light-400" />
+              <el-date-picker v-model="dateRange" type="daterange" :start-placeholder="t('export.date-range.start')"
+                :end-placeholder="t('export.date-range.end')" format="YYYY-MM-DD" value-format="YYYY-MM-DD"
+                class="w-full" :shortcuts="shortcuts" :disabled-date="disabledDate" :size="size"
+                popper-class="bg-dark-200 text-light-400" />
             </el-config-provider>
           </div>
         </div>

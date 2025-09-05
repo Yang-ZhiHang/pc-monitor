@@ -13,8 +13,10 @@
     "windows": [
       {
         "title": "pc-monitor",
-        "width": 1000,
+        "width": 1100,
         "height": 700,
+        "minWidth": 1100,
+        "minHeight": 650,
         "decorations": false
       }
     ],
@@ -31,6 +33,9 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
+    ],
+    "resources": [
+      "templates"
     ]
   }
 }

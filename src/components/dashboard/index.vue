@@ -81,6 +81,10 @@ invoke<Record<string, Record<string, number>>>("get_app_usage_duration_last_n_da
   console.error("Error fetching app usage duration:", error);
 });
 
+const appUsageAvailable = () => {
+  return appUsage.value !== null && Object.keys(appUsage.value).length > 0;
+}
+
 // ========== bar chart
 
 let barData = ref<Object | null>(null);
@@ -88,7 +92,7 @@ let barOptions = ref<Object | null>(null);
 
 import { getWeekData, getWeekLabelKey, getMonthWeekData, getMonthWeekLabelKey, getYearMonthData, getYearMonthLabelKey } from '@/utils/date';
 
-function initBarData(dataset: Record<string, number>, p: PeriodType) {
+function initBarData(dataset: Record<string, number>, p: Period) {
   let labels: string[] = [];
   let data: number[] = [];
   switch (p) {
@@ -107,17 +111,30 @@ function initBarData(dataset: Record<string, number>, p: PeriodType) {
   }
   barData.value = {
     labels,
-    datasets: [{
-      label: '时长',
-      data,
-      backgroundColor: 'rgba(59, 130, 246, 0.7)',
-      borderRadius: 6,
-      doughnutPercentage: 0.6,
-    }]
+    datasets: [
+      {
+        label: '时长',
+        data,
+        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+        order: 1,
+      },
+      {
+        label: '时长',
+        data,
+        borderColor: 'rgba(255, 99,132, 0.5)',
+        fill: false,
+        cubicInterpolationMode: 'monotone',
+        tension: 0.4,
+        type: 'line',
+        order: 0,
+      }
+    ]
   };
 }
 
-function initBarOptions() {
+function initBarOptions(dataset: Record<string, number>) {
+  const maxVal = Math.max(...Object.values(dataset));
+  const useHour = maxVal >= 3600;
   barOptions.value = {
     responsive: true,
     maintainAspectRatio: false,
@@ -144,8 +161,7 @@ function initBarOptions() {
           color: 'rgba(255, 255, 255, 0.7)',
           // seconds to hours
           callback: function (value: number) {
-            if (value < 3600) return Math.round(value / 60);
-            return Math.round(value / 3600);
+            return useHour ? `${(value / 3600).toFixed(1)} h` : `${value}m`;
           }
         },
       },
@@ -170,7 +186,7 @@ invoke<Record<string, number>>("get_daily_usage_duration_last_n_days", { n: 365 
   dailyUsage.value = result;
   console.log("Daily usage duration:", result);
   initBarData(result, Period.WEEKLY);
-  initBarOptions();
+  initBarOptions(result);
   cmpCardData.value[0] = getCmpDays(dailyUsage.value ?? {});
   dailyUsageReady.value = true;
   console.log("(dailyUsage) invoke executed");
@@ -180,8 +196,9 @@ invoke<Record<string, number>>("get_daily_usage_duration_last_n_days", { n: 365 
 
 // ===== period
 
-import { periodText, Period, type PeriodType } from '@/constants/dashboard';
-const period = ref<PeriodType>(Period.WEEKLY);
+import { periodText } from '@/constants/dashboard';
+import { Period } from '@/types/dashboard';
+const period = ref<Period>(Period.WEEKLY);
 
 watch(period, (newPeriod) => { initBarData(dailyUsage.value ?? {}, newPeriod) });
 
@@ -233,7 +250,7 @@ const dailyUsageReady = ref<Boolean>(false);
       <div class="bg-dark-200 rounded-md p-5 card-shadow flex flex-col">
         <h3 class="font-semibold mb-4">{{ t(chartTitle.appUsage) }}</h3>
         <div class="flex-1 flex items-center justify-center">
-          <DoughnutChart v-if="doughnutData && doughnutOptions" :data="doughnutData" :options="doughnutOptions" />
+          <DoughnutChart v-if="appUsageAvailable()" :data="doughnutData" :options="doughnutOptions" />
           <div v-else class="w-full h-full flex items-center justify-center">
             <p class="text-light-400">{{ t('dashboard.no-data') }}</p>
           </div>

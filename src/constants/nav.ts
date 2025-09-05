@@ -1,9 +1,4 @@
-type navItem = {
-  label: string;
-  detail: string;
-  icon: string;
-  route: string;
-}
+import { navItem } from "@/types/nav";
 
 export const title = "PUS";
 

@@ -1,26 +1,17 @@
+import { Period } from "@/types/dashboard";
+
 export const chartTitle: Record<string, string> = {
     dailyUsage: 'dashboard.chart.0',
     appUsage: 'dashboard.chart.1'
 }
 
-export enum Period {
-    WEEKLY = 'weekly',
-    MONTHLY = 'monthly',
-    YEARLY = 'yearly'
-}
-
-export type PeriodType =
-    | Period.WEEKLY
-    | Period.MONTHLY
-    | Period.YEARLY;
-
-export const periodText: Record<PeriodType, string> = {
+export const periodText: Record<Period, string> = {
     [Period.WEEKLY]: 'dashboard.period.week',
     [Period.MONTHLY]: 'dashboard.period.month',
     [Period.YEARLY]: 'dashboard.period.year'
 };
 
-export const periodLabelKey: Record<PeriodType, string[]> = {
+export const periodLabelKey: Record<Period, string[]> = {
     [Period.WEEKLY]: ['week.mon', 'week.tue', 'week.wed', 'week.thu', 'week.fri', 'week.sat', 'week.sun'],
     [Period.MONTHLY]: ['week.0', 'week.1', 'week.2', 'week.3', 'week.4'],
     [Period.YEARLY]: ['month.jan', 'month.feb', 'month.mar', 'month.apr', 'month.may', 'month.jun', 'month.jul', 'month.aug', 'month.sep', 'month.oct', 'month.nov', 'month.dec']
