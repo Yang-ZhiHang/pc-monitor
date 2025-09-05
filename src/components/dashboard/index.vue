@@ -115,18 +115,14 @@ function initBarData(dataset: Record<string, number>, p: Period) {
       {
         label: '时长',
         data,
-        backgroundColor: 'rgba(59, 130, 246, 0.7)',
-        order: 1,
-      },
-      {
-        label: '时长',
-        data,
-        borderColor: 'rgba(255, 99,132, 0.5)',
+        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+        borderColor: 'rgba(59, 130, 246, 0.8)',
         fill: false,
         cubicInterpolationMode: 'monotone',
         tension: 0.4,
-        type: 'line',
-        order: 0,
+        pointStyle: 'circle',
+        pointRadius: 8,
+        pointHoverRadius: 16
       }
     ]
   };

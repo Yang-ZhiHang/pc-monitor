@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
 import { ElSelect, ElOption } from 'element-plus';
-import { useSettingStore } from '@/stores/setting';
 import { invoke } from '@tauri-apps/api/core';
 
+import { useI18n } from 'vue-i18n';
+import { useSettingStore } from '@/stores/setting';
+const { t } = useI18n();
 const settingStore = useSettingStore();
 
 watch(() => settingStore.startOnBoot, (newVal) => {
@@ -56,20 +56,6 @@ watch(() => settingStore.startOnBoot, (newVal) => {
                 </div>
               </label>
             </label>
-          </div>
-        </div>
-
-        <div class="border-t border-dark-100 pt-6">
-          <h3 class="font-medium mb-4 flex items-center">
-            <i class="fa fa-trash text-primary mr-2"></i>
-            {{ t('setting.data-management.title') }}
-          </h3>
-          <div class="pl-6 space-y-4">
-            <button
-              class="w-full text-left px-3 py-2 text-sm rounded bg-dark-300 hover:bg-dark-100 transition-colors flex justify-between items-center cursor-pointer">
-              <span>{{ t('setting.data-management.0') }}</span>
-              <i class="fa fa-arrow-right text-light-300"></i>
-            </button>
           </div>
         </div>
       </div>

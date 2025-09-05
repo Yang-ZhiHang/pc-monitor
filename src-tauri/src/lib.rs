@@ -68,6 +68,14 @@ mod app_init {
 
     pub fn setup_plugins(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wry> {
         builder
+            .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+                logging!(debug, Type::Window, true, "Singleton instance activated");
+                if let Some(window) = WindowManager::get_main_window() {
+                    let _ = window.unminimize();
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                }
+            }))
             .plugin(tauri_plugin_dialog::init())
             .plugin(tauri_plugin_opener::init())
     }
@@ -190,15 +198,18 @@ pub fn run() {
         });
     });
 
-    let builder =
-        app_init::setup_plugins(tauri::Builder::default().plugin(tauri_plugin_shell::init()))
-            .invoke_handler(app_init::generate_handlers())
-            .setup(|app| {
-                let _tray = app_init::setup_tray_icon(app).expect("Error setting up tray icon");
-                let app_handle = app.handle().clone();
-                app_init::init_core(&app_handle);
-                Ok(())
-            });
+    let builder = app_init::setup_plugins(
+        tauri::Builder::default()
+            .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {}))
+            .plugin(tauri_plugin_shell::init()),
+    )
+    .invoke_handler(app_init::generate_handlers())
+    .setup(|app| {
+        let _tray = app_init::setup_tray_icon(app).expect("Error setting up tray icon");
+        let app_handle = app.handle().clone();
+        app_init::init_core(&app_handle);
+        Ok(())
+    });
 
     let app = builder
         .build(tauri::generate_context!())
