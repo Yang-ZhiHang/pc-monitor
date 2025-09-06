@@ -14,13 +14,13 @@ An app for monitoring and visualizing your PC's usage metrics over time.
 - [x] Add R_IGNORE_LIST in get_app_usage_duration_xxx
 - [x] Singleton pattern needed in init_db()
 - [x] Ensure the usage of &str and String, optimize the code
+- [x] A more user-friendly export panel (sync with the style of export template?)
+    - [x] modular panel: Export fmt、data summary、fast choice for date range
 - [ ] i18n in rust backend
 - [ ] Customizable usage tracking frequency
-- [ ] A more user-friendly export panel (sync with the style of export template?)
-    - [ ] modular panel: Export fmt、data summary、fast choice for date range
 - [ ] Refactor main dashboard
     - [ ] App usage rank
-    - [ ] [Total this week] -> [Total usage today]
+    - [ ] [Total this week] -> [Total usage today]?
 
 ## Tech Stacks
 

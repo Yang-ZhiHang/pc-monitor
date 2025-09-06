@@ -1,7 +1,7 @@
 pub struct ExportFmt;
 
 impl ExportFmt {
-    pub const HTML: &str = "html";
-    pub const CSV: &str = "csv";
-    pub const JSON: &str = "json";
+    pub const HTML: &str = "HTML";
+    pub const CSV: &str = "CSV";
+    pub const JSON: &str = "JSON";
 }

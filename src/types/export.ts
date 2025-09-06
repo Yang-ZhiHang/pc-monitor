@@ -1,5 +1,11 @@
 export enum ExportFormat {
-    HTML = 'html',
-    CSV = 'csv',
-    JSON = 'json'
+    HTML = 'HTML',
+    CSV = 'CSV',
+    JSON = 'JSON'
 } 
+
+export type ExportOption = {
+    title: string,
+    description: string,
+    icon: string
+}

@@ -32,7 +32,7 @@ const switchView = (view: string) => {
         <button v-for="(item, index) in navItems" :key="index" @click="switchView(item.route)"
           class="flex items-center mr-0 mt-4 px-3 py-1.5 rounded text-lg hover:bg-dark-100 transition-colors cursor-pointer"
           :class="{ 'bg-primary/20 text-primary': currentRoute === item.route }">
-          <i :class="`fa fa-${item.icon} mr-2 flex! items-center h-full`"></i>
+          <i :class="`fa fa-${item.icon} mr-2 flex! items-center`"></i>
           <span class="flex-1 font-bold" >{{ t(item.label) }}</span>
         </button>
       </div>

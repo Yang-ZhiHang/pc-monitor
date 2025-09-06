@@ -50,9 +50,30 @@
                 "last-week": "上周",
                 "last-month": "上个月",
                 "placeholder": "选择日期"
+            },
+            "tip": "请选择您想要导出报告的日期范围。",
+            "last-week": "近一周",
+            "last-month": "近一月"
+        },
+        "export-fmt": {
+            "title": "导出格式",
+            "html": {
+                "title": "HTML",
+                "desc": "导出 .html 文件，打开后可以在浏览器查看"
+            },
+            "csv": {
+                "title": "CSV",
+                "desc": "导出包含期日，应用，使用时间三个字段的表格，适合用于数据分析"
+            },
+            "json": {
+                "title": "JSON",
+                "desc": "导出内容以期日为 key, 使用时间列表为 value，适合进行二次开发"
             }
         },
-        "export-fmt": "导出格式",
+        "export": {
+            "date-range": "日期范围",
+            "export-fmt": "导出格式"
+        },
         "save": "导出数据"
     },
     "setting": {

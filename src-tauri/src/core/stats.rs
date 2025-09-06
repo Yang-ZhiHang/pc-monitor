@@ -9,11 +9,8 @@ use std::collections::HashMap;
 
 /// Update the daily usage statistics for a specific application (data derived from app usage logs).
 pub fn update_daily_app_usage(conn: &Connection) -> Result<(), rusqlite::Error> {
-    // 1. Obtain today's date (yyyy-mm-dd)
-    let utc_today = chrono::Utc::now().date_naive().to_string();
-
-    // 2. Update usage duration for each app
-    let local_today = Local::now().date_naive();
+    // Update usage duration for each app
+    let local_today = get_local_date();
     let usage_map = collect_app_usage_duration(&conn, local_today)?;
     for (key, val) in &usage_map {
         let sql = format!(
@@ -21,14 +18,14 @@ pub fn update_daily_app_usage(conn: &Connection) -> Result<(), rusqlite::Error> 
             TABLE::DAILY_APP_USAGE
         );
         let mut stmt = conn.prepare(&sql)?;
-        stmt.execute(params![utc_today, key, val, val])?;
+        stmt.execute(params![local_today.to_string(), key, val, val])?;
     }
     Ok(())
 }
 
 /// Update the daily usage statistics for all applications (data derived from daily app usage stats).
 pub fn update_daily_usage_stats(conn: &Connection) -> Result<(), rusqlite::Error> {
-    let today = chrono::Utc::now().date_naive().to_string();
+    let today = get_local_date().to_string();
 
     // Update usage duration for today
     let duration = get_daily_usage_duration(&conn)?;
@@ -47,6 +44,14 @@ fn collect_app_usage_duration(
     local_date: NaiveDate,
 ) -> Result<HashMap<String, i64>, rusqlite::Error> {
     let (start_of_day, end_of_day) = get_local_day_start_end_in_utc(local_date);
+    logging!(
+        debug,
+        Type::Statistics,
+        false,
+        "Collect app usage duration: time range from {} to {}",
+        start_of_day,
+        end_of_day
+    );
 
     let sql = format!(
         "SELECT * FROM {} WHERE time BETWEEN '{}' AND '{}'",
@@ -145,7 +150,7 @@ fn get_app_usage_duration(
         debug,
         Type::Statistics,
         false,
-        "The time range from {} to {}",
+        "Get app usage duration: time range from {} to {}",
         start_date,
         end_date
     );
@@ -179,7 +184,7 @@ fn get_app_usage_duration(
 
 /// Get all app usage durations that occurred today
 fn get_daily_usage_duration(conn: &Connection) -> Result<u64, rusqlite::Error> {
-    let local_today = get_local_date_in_utc();
+    let local_today = get_local_date();
 
     let sql = format!(
         "SELECT * FROM {} WHERE date = '{}'",
@@ -224,8 +229,8 @@ fn get_local_day_start_end_in_utc(local_date: NaiveDate) -> (String, String) {
     (start_of_day, end_of_day)
 }
 
-fn get_local_date_in_utc() -> NaiveDate {
-    Utc::now().date_naive()
+fn get_local_date() -> NaiveDate {
+    Local::now().date_naive()
 }
 
 /// Obtain the date n days ago in UTC
@@ -238,7 +243,7 @@ pub fn get_app_usage_duration_last_n_days(
     n: u64,
 ) -> Result<HashMap<String, HashMap<String, u64>>, String> {
     let conn = DbManager::global().get().lock();
-    let now_date = Utc::now().date_naive();
+    let now_date = get_local_date();
     let start_date = now_date - Days::new(n);
     match get_app_usage_duration(&conn, start_date, now_date) {
         Ok(mp) => Ok(mp),
@@ -263,7 +268,7 @@ pub fn get_app_usage_duration_range(
 #[tauri::command]
 pub fn get_daily_usage_duration_last_n_days(n: u64) -> Result<HashMap<String, u64>, String> {
     let conn = DbManager::global().get().lock();
-    let local_date_in_utc = get_local_date_in_utc();
+    let local_date_in_utc = get_local_date();
     let start_date_in_utc = get_recall_date_in_utc(local_date_in_utc, n);
     let sql = format!(
         "SELECT * FROM {} WHERE date BETWEEN '{}' AND '{}'",

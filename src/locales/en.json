@@ -39,9 +39,8 @@
         "no-data": "No data available"
     },
     "export": {
-        "title": "Export statistical data",
         "date-range": {
-            "title": "Date range",
+            "title": "Choose date range",
             "start": "start date",
             "end": "end date",
             "picker": {
@@ -50,9 +49,30 @@
                 "last-week": "Last week",
                 "last-month": "Last month",
                 "placeholder": "Pick a day"
+            },
+            "tip": "Please select the date range for the report you want to export.",
+            "last-week": "Last week",
+            "last-month": "Last month"
+        },
+        "export-fmt": {
+            "title": "Export format",
+            "html": {
+                "title": "HTML",
+                "desc": "Suitable for viewing on a webpage"
+            },
+            "csv": {
+                "title": "CSV",
+                "desc": "Suitable for data analysis"
+            },
+            "json": {
+                "title": "JSON",
+                "desc": "Suitable for secondary development"
             }
         },
-        "export-fmt": "Export format",
+        "export": {
+            "date-range": "Date Range",
+            "export-fmt": "Export Fmt"
+        },
         "save": "Export data"
     },
     "setting": {

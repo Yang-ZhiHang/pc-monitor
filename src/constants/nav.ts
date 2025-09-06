@@ -4,7 +4,7 @@ export const title = "PUS";
 
 export const navItems: navItem[] = ([
   { label: 'nav.overview', detail: 'nav.detail.overview', icon: 'chart-line', route: 'dashboard' },
-  { label: 'nav.export', detail: 'nav.detail.export', icon: 'download', route: 'export' },
+  { label: 'nav.export', detail: 'nav.detail.export', icon: 'file-export', route: 'export' },
   { label: 'nav.setting', detail: 'nav.detail.setting', icon: 'cog', route: 'settings' }
 ]);
 
