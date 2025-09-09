@@ -20,6 +20,9 @@ importers:
       '@tauri-apps/plugin-shell':
         specifier: ~2.3.1
         version: 2.3.1
+      mitt:
+        specifier: ^3.0.1
+        version: 3.0.1
       vue:
         specifier: ^3.5.13
         version: 3.5.20(typescript@5.6.3)

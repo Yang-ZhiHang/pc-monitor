@@ -302,6 +302,33 @@ pub fn get_daily_usage_duration_last_n_days(n: u64) -> Result<HashMap<String, u6
     Ok(result)
 }
 
+#[tauri::command]
+pub fn refresh_data() -> Result<(), String> {
+    let conn = DbManager::global().get().lock();
+    let err_msg = "Failed to refresh data";
+    if let Err(e) = update_daily_app_usage(&conn) {
+        logging!(
+            error,
+            Type::Statistics,
+            false,
+            "Failed to update daily app usage: {}",
+            e
+        );
+        return Err(format!("{}: {}", err_msg, e));
+    }
+    if let Err(e) = update_daily_usage_stats(&conn) {
+        logging!(
+            error,
+            Type::Statistics,
+            false,
+            "Failed to update daily usage stats: {}",
+            e
+        );
+        return Err(format!("{}: {}", err_msg, e));
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 pub mod test {
     use super::*;

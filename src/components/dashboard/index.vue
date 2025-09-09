@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
-import { ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import { invoke } from '@tauri-apps/api/core';
 import { chartTitle } from '@/constants/dashboard';
@@ -19,7 +19,7 @@ Chart.register(...registerables);
 let doughnutData = ref<Object | null>(null);
 let doughnutOptions = ref<Object | null>(null);
 
-function initDoughnutData(dataset: Record<string, number>, k: number = 4) {
+function updateDoughnutData(dataset: Record<string, number>, k: number = 4) {
   if (dataset.length === 0) return;
   doughnutData.value = {
     labels: Object.keys(dataset).slice(0, k),
@@ -32,7 +32,7 @@ function initDoughnutData(dataset: Record<string, number>, k: number = 4) {
   };
 }
 
-function initDoughnutOptions() {
+function updateDoughnutOptions() {
   doughnutOptions.value = {
     responsive: true,
     maintainAspectRatio: false,
@@ -62,21 +62,27 @@ function initDoughnutOptions() {
 }
 
 const appUsage = ref<Record<string, number> | null>(null);
-invoke<Record<string, Record<string, number>>>("get_app_usage_duration_last_n_days", { n: 1 }).then(_ => {
-  console.log("(appUsage) invoke executing");
+
+async function fetchRawAppUsage(days: number = 0): Promise<Record<string, Record<string, number>>> {
+  return await invoke<Record<string, Record<string, number>>>("get_app_usage_duration_last_n_days", { n: days })
+}
+
+fetchRawAppUsage(1).then(_ => {
   const today = _[getCurrentDate(0)] || {};
   const yest = _[getCurrentDate(1)] || {};
   appUsage.value = Object.fromEntries(
     Object.entries(today).sort(([, a], [, b]) => b - a)
   );
-  console.log("App usage duration:", appUsage.value);
-  initDoughnutData(appUsage.value, 4);
-  initDoughnutOptions();
+  console.log("[appUsage] App usage duration:", appUsage.value);
+
+  // Update doughnut chart
+  updateDoughnutData(appUsage.value, 4);
+  updateDoughnutOptions();
+
   // Obtain the length of appUsage
   cmpCardData.value[1][0] = Object.keys(today).length;
   cmpCardData.value[1][1] = Object.keys(yest).length;
   appUsageReady.value = true;
-  console.log("(appUsage) invoke executed");
 }).catch((error) => {
   console.error("Error fetching app usage duration:", error);
 });
@@ -92,7 +98,7 @@ let barOptions = ref<Object | null>(null);
 
 import { getWeekData, getWeekLabelKey, getMonthWeekData, getMonthWeekLabelKey, getYearMonthData, getYearMonthLabelKey } from '@/utils/date';
 
-function initBarData(dataset: Record<string, number>, p: Period) {
+function updateBarData(dataset: Record<string, number>, p: Period) {
   let labels: string[] = [];
   let data: number[] = [];
   switch (p) {
@@ -128,7 +134,7 @@ function initBarData(dataset: Record<string, number>, p: Period) {
   };
 }
 
-function initBarOptions(dataset: Record<string, number>) {
+function updateBarOptions(dataset: Record<string, number>) {
   const maxVal = Math.max(...Object.values(dataset));
   const useHour = maxVal >= 3600;
   barOptions.value = {
@@ -174,18 +180,23 @@ function initBarOptions(dataset: Record<string, number>) {
 }
 
 const dailyUsage = ref<Record<string, number> | null>(null);
-invoke<Record<string, number>>("get_daily_usage_duration_last_n_days", { n: 365 }).then(_ => {
-  console.log("(dailyUsage) invoke executing");
+
+async function fetchRawDailyUsage(days: number = 0): Promise<Record<string, number>> {
+  return await invoke<Record<string, number>>("get_daily_usage_duration_last_n_days", { n: days })
+}
+
+fetchRawDailyUsage(365).then(_ => {
   const result = Object.fromEntries(
     Object.keys(_).sort().map(key => [key, (_)[key]])
   );
   dailyUsage.value = result;
-  console.log("Daily usage duration:", result);
-  initBarData(result, Period.WEEKLY);
-  initBarOptions(result);
+  console.log("[dailyUsage] Daily usage duration:", result);
+
+  updateBarData(result, Period.WEEKLY);
+  updateBarOptions(result);
+
   cmpCardData.value[0] = getCmpDays(dailyUsage.value ?? {});
   dailyUsageReady.value = true;
-  console.log("(dailyUsage) invoke executed");
 }).catch((error) => {
   console.error("Error fetching app usage duration:", error);
 });
@@ -196,7 +207,7 @@ import { periodText } from '@/constants/dashboard';
 import { Period } from '@/types/dashboard';
 const period = ref<Period>(Period.WEEKLY);
 
-watch(period, (newPeriod) => { initBarData(dailyUsage.value ?? {}, newPeriod) });
+watch(period, (newPeriod) => { updateBarData(dailyUsage.value ?? {}, newPeriod) });
 
 // ===== cmp card
 
@@ -206,6 +217,55 @@ import { compareCardInfo } from '../../constants/dashboard';
 const cmpCardData = ref<Array<[number, number]>>([[0, 0], [0, 0]]);
 const appUsageReady = ref<Boolean>(false);
 const dailyUsageReady = ref<Boolean>(false);
+
+// ===== refresh data
+
+import { bus } from '@/utils/bus';
+
+function fetchData() {
+  fetchRawAppUsage(1).then(_ => {
+    const today = _[getCurrentDate(0)] || {};
+    const yest = _[getCurrentDate(1)] || {};
+    appUsage.value = Object.fromEntries(
+      Object.entries(today).sort(([, a], [, b]) => b - a)
+    );
+    console.log("[appUsage] App usage duration:", appUsage.value);
+
+    // Update doughnut chart
+    updateDoughnutData(appUsage.value, 4);
+    updateDoughnutOptions();
+
+    // Obtain the length of appUsage
+    cmpCardData.value[1][0] = Object.keys(today).length;
+    cmpCardData.value[1][1] = Object.keys(yest).length;
+    appUsageReady.value = true;
+  }).catch((error) => {
+    console.error("Error fetching app usage duration:", error);
+  });
+
+  fetchRawDailyUsage(365).then(_ => {
+    const result = Object.fromEntries(
+      Object.keys(_).sort().map(key => [key, (_)[key]])
+    );
+    dailyUsage.value = result;
+    console.log("[dailyUsage] Daily usage duration:", result);
+
+    updateBarData(result, Period.WEEKLY);
+    updateBarOptions(result);
+
+    cmpCardData.value[0] = getCmpDays(dailyUsage.value ?? {});
+    dailyUsageReady.value = true;
+  }).catch((error) => {
+    console.error("Error fetching app usage duration:", error);
+  });
+}
+
+onMounted(() => {
+  bus.on('refresh-dashboard', fetchData);
+})
+onUnmounted(() => {
+  bus.off('refresh-dashboard', fetchData);
+})
 </script>
 
 <template>

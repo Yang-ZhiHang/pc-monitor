@@ -15,7 +15,7 @@ use constants::window::{W_IGNORE_APP_LIST, WindowEvent};
 use core::report::export_report;
 use core::stats::{
     get_app_usage_duration_last_n_days, get_app_usage_duration_range,
-    get_daily_usage_duration_last_n_days, update_daily_app_usage, update_daily_usage_stats,
+    get_daily_usage_duration_last_n_days, update_daily_app_usage, update_daily_usage_stats, refresh_data
 };
 use core::task::register_event_listener;
 use core::task::register_scheduled_task;
@@ -87,6 +87,7 @@ mod app_init {
             get_app_usage_duration_last_n_days,
             get_app_usage_duration_range,
             get_daily_usage_duration_last_n_days,
+            refresh_data,
             // Settings
             set_start_on_boot_rs,
             // Export
@@ -166,7 +167,7 @@ pub fn run() {
                 let conn = init_db().expect("Error initializing database");
                 update_daily_app_usage(&conn).expect("Error updating daily app usage");
             },
-            Duration::from_secs(300),
+            Duration::from_secs(120),
         );
         register_scheduled_task(
             "update_daily_usage_stats",

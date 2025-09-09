@@ -9,6 +9,7 @@
             "export": "Export Data",
             "setting": "Setting"
         },
+        "refresh": "Refresh Data",
         "github": "GitHub Repository"
     },
     "dashboard": {

@@ -40,7 +40,6 @@ const props = defineProps({
 });
 
 const { currentRoute } = toRefs(props);
-
 const getTitle = (): string => {
     for (const item of navItems) {
         if (item.route === currentRoute.value) {
@@ -48,6 +47,12 @@ const getTitle = (): string => {
         }
     }
     return '';
+}
+
+import { bus } from '@/utils/bus';
+const refreshData = () => {
+    invoke('refresh_data');
+    bus.emit('refresh-dashboard');
 }
 </script>
 
@@ -70,7 +75,18 @@ const getTitle = (): string => {
             </button>
         </div>
         <div class="flex items-center justify-between w-full pl-4 pr-2">
-            <h1 class="text-xl font-bold w-max shrink-0">{{ t(getTitle()) }}</h1>
+            <div class="flex w-max shrink-0">
+                <h1 class="text-xl font-bold w-max mr-2">{{ t(getTitle()) }}</h1>
+                <button
+                    v-if="currentRoute === 'dashboard'"
+                    @click="refreshData"
+                    class="flex items-center justify-center text-white"
+                    :alt="t('nav.refresh')"
+                    :title="t('nav.refresh')"
+                >
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+            </div>
             <div class="flex justify-end w-full">
                 <button @click="() => open(githubLink)" class="rounded-full! p-1" :title="t('nav.github')">
                     <i class="fa-brands fa-github text-2xl aspect-square flex! items-center justify-center"></i>

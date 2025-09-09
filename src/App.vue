@@ -22,8 +22,8 @@ const switchView = (view: string) => {
     <!-- Navigation Side Bar -->
     <div class="flex flex-col shrink-0 items-center justify-items-start px-3 py-3 w-50 bg-dark-400 border-r border-dark-200 z-10">
       <div class="flex items-center justify-around w-full pb-2 mt-8">
-        <div class="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-          <i class="fa fa-bar-chart text-white"></i>
+        <div class="flex items-center justify-center w-8 h-8 rounded-md bg-primary text-white">
+          <i class="fa fa-bar-chart"></i>
         </div>
         <h1 class="text-xl font-semibold">{{ t('title') }}</h1>
       </div>
