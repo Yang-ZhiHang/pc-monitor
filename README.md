@@ -3,7 +3,7 @@
 An app for monitoring and visualizing your PC's usage metrics over time.
 
 🌏 README in
-[**中文**](https://github.com/Yang-ZhiHang/pc-monitor/blob/master/docs/README.zh-CN.md) Provided by the community and may not always be up-to-date)
+[**中文**](https://github.com/Yang-ZhiHang/pc-monitor/blob/master/docs/README.zh-CN.md) Provided
 
 ## Features
 
