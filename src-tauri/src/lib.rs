@@ -15,7 +15,8 @@ use constants::window::{W_IGNORE_APP_LIST, WindowEvent};
 use core::report::export_report;
 use core::stats::{
     get_app_usage_duration_last_n_days, get_app_usage_duration_range,
-    get_daily_usage_duration_last_n_days, update_daily_app_usage, update_daily_usage_stats, refresh_data
+    get_daily_usage_duration_last_n_days, refresh_data, update_daily_app_usage,
+    update_daily_usage_stats,
 };
 use core::task::register_event_listener;
 use core::task::register_scheduled_task;
@@ -23,6 +24,7 @@ use parking_lot::Mutex;
 use tauri::AppHandle;
 use utils::autostart::set_start_on_boot_rs;
 use utils::db::{DbManager, init_db, insert};
+use utils::logging;
 use utils::logging::Type;
 use utils::window::WindowManager;
 use utils::window::{
@@ -158,6 +160,10 @@ mod app_init {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    if let Err(e) = logging::init_logger() {
+        eprintln!("Failed to initialize logger: {}", e);
+    }
+
     // The thread where scheduled tasks and event listening run
     thread::spawn(|| {
         use tokio::time::Duration;
@@ -227,7 +233,7 @@ pub fn run() {
                     eprintln!("Error inserting close log: {}", e);
                 }
                 logging!(
-                    debug,
+                    info,
                     Type::Exit,
                     "App usage log inserted: [{} - {}]",
                     time_stamp,

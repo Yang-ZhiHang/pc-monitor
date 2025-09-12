@@ -1,4 +1,49 @@
-use std::fmt;
+use chrono::Local;
+use simplelog::*;
+use std::fs::File;
+use std::{env, fmt};
+use time::macros::format_description;
+
+pub fn init_logger() -> Result<(), Box<dyn std::error::Error>> {
+    let log_file = File::create(format!(
+        "pc-monitor_{}.log",
+        Local::now().format("%Y-%m-%d_%H-%M-%S")
+    ))?;
+
+    let config = ConfigBuilder::new()
+        .set_target_level(LevelFilter::Off)
+        .set_thread_level(LevelFilter::Off)
+        .set_time_format_custom(format_description!(
+            "[year]-[month]-[day] [hour]:[minute]:[second]"
+        ))
+        .set_time_offset_to_local()
+        .unwrap()
+        .build();
+
+    // Set log level from RUST_LOG env variable, default to Info
+    // use `$env:RUST_LOG="debug";` in powershell for debug level
+    let env_log_level = env::var("RUST_LOG")
+        .map(|x| match x.to_lowercase().as_str() {
+            "trace" => LevelFilter::Trace,
+            "debug" => LevelFilter::Debug,
+            "info" => LevelFilter::Info,
+            "warn" => LevelFilter::Warn,
+            "error" => LevelFilter::Error,
+            _ => LevelFilter::Info,
+        })
+        .unwrap_or(LevelFilter::Info);
+
+    CombinedLogger::init(vec![
+        TermLogger::new(
+            env_log_level,
+            config.clone(),
+            TerminalMode::Mixed,
+            ColorChoice::Auto,
+        ),
+        WriteLogger::new(LevelFilter::Debug, config, log_file),
+    ])?;
+    Ok(())
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Type {

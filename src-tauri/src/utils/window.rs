@@ -64,13 +64,6 @@ fn friendly_name_from_exe(exe: &Path) -> Option<String> {
         core::PCWSTR,
     };
 
-    logging!(
-        debug,
-        Type::Window,
-        false,
-        "Target exe path: {}",
-        exe.display()
-    );
     let wide: Vec<u16> = exe.as_os_str().encode_wide().chain(Some(0)).collect();
     unsafe {
         // 1. Obtain the size of version infomation in .exe
@@ -107,26 +100,12 @@ fn friendly_name_from_exe(exe: &Path) -> Option<String> {
         ) == FALSE
             && info_len == 0
         {
-            logging!(
-                debug,
-                Type::Window,
-                false,
-                "VerQueryValueW(Translation) failed: {}",
-                windows::core::Error::from_win32()
-            );
             return None;
         }
 
         // 3.2 Take out the first language-codepage combo
         let trans = *(info_ptr as *const u32);
         let lang_cp = format!("{:04x}{:04x}", trans & 0xffff, (trans >> 16) & 0xffff);
-        logging!(
-            debug,
-            Type::Window,
-            false,
-            "Detected lang-codepage: {}",
-            lang_cp
-        );
 
         // 3.3 Spell out the Infomation Path
         let sub_block = format!("\\StringFileInfo\\{}\\FileDescription\0", lang_cp)
@@ -145,23 +124,10 @@ fn friendly_name_from_exe(exe: &Path) -> Option<String> {
         ) == FALSE
             && len == 0
         {
-            logging!(
-                debug,
-                Type::Window,
-                false,
-                "VerQueryValueW(FileDescription) failed or empty"
-            );
             return None;
         }
 
         let slice = std::slice::from_raw_parts(ptr as *const u16, len as usize);
-        logging!(
-            debug,
-            Type::Window,
-            false,
-            "Got FileDescription: {}",
-            String::from_utf16_lossy(slice)
-        );
         return Some(
             String::from_utf16_lossy(slice)
                 .trim_end_matches('\0')

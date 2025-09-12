@@ -6,7 +6,10 @@ use winreg::{RegKey, enums::*};
 
 #[cfg(target_os = "windows")]
 pub fn set_start_on_boot(enable: bool) -> Result<(), Box<dyn std::error::Error>> {
-    let exe_path = env::current_exe()?.to_str().unwrap().to_string();
+    if let Some(exe_dir) = env::current_exe()?.parent() {
+        env::set_current_dir(exe_dir)?;
+    }
+    let exe_path = format!("\"{}\"", env::current_exe()?.to_str().unwrap().to_string());
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let run = hkcu.open_subkey_with_flags(
         "Software\\Microsoft\\Windows\\CurrentVersion\\Run",

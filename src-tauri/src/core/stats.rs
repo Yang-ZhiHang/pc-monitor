@@ -107,16 +107,6 @@ fn collect_app_usage_duration(
             chrono::NaiveDateTime::parse_from_str(&pre_time.as_ref().unwrap(), "%Y-%m-%d %H:%M:%S"),
             chrono::NaiveDateTime::parse_from_str(&cur_time, "%Y-%m-%d %H:%M:%S"),
         ) {
-            logging!(
-                debug,
-                Type::Statistics,
-                false,
-                "Comparing log entries: pre = {} - {}, cur = {} - {}",
-                pre_time.as_ref().unwrap(),
-                pre_name.as_ref().unwrap(),
-                cur_time,
-                cur_name
-            );
             let duration = cur_dt.signed_duration_since(pre_dt).num_seconds();
             result
                 .entry(pre_name.as_ref().unwrap().clone())
