@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    pc_usage_statistics_lib::run()
+    pc_monitor_lib::run()
 }

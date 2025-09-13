@@ -1,6 +1,7 @@
 use crate::constants::report::ExportFmt;
 use crate::core::stats::get_app_usage_duration_range;
 use crate::logging;
+use crate::utils::file::get_exe_path;
 use crate::utils::file::save_file_with_dialog;
 use crate::utils::logging::Type;
 use crate::utils::test::jsonify;
@@ -35,8 +36,14 @@ pub fn export_report(start_date: &str, end_date: &str, format: &str) -> Result<(
             csv
         }
         ExportFmt::HTML => {
-            let template = fs::read_to_string("templates/template_report_overview.html")
-                .map_err(|e| format!("Template error: {}", e))?;
+            let exe_path = get_exe_path().map_err(|e| e.to_string())?;
+            let template_path = exe_path
+                .parent()
+                .ok_or("Failed to get executable parent directory")?
+                .join("templates")
+                .join("template_report_overview.html");
+            let template =
+                fs::read_to_string(&template_path).map_err(|e| format!("Template error: {}", e))?;
             let mut tera = Tera::default();
             tera.add_raw_template("report", &template)
                 .map_err(|e| format!("Failed to add template: {}", e))?;
