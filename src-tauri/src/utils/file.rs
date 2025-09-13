@@ -1,5 +1,11 @@
 use crate::AppHandleManager;
+use std::{env, path::PathBuf};
 use tauri_plugin_dialog::DialogExt;
+
+pub fn get_exe_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
+    let exe_path = env::current_exe()?;
+    Ok(exe_path)
+}
 
 pub fn save_file_with_dialog(
     content: &str,

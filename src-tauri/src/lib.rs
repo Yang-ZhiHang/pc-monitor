@@ -67,10 +67,11 @@ singleton_with_logging!(AppHandleManager, INSTANCE);
 
 mod app_init {
     use super::*;
+    use tauri_plugin_autostart::MacosLauncher;
 
     pub fn setup_plugins(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wry> {
         builder
-            .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+            .plugin(tauri_plugin_single_instance::init(|_app, _argv, _cwd| {
                 logging!(debug, Type::Window, true, "Singleton instance activated");
                 if let Some(window) = WindowManager::get_main_window() {
                     let _ = window.unminimize();
@@ -78,8 +79,13 @@ mod app_init {
                     let _ = window.set_focus();
                 }
             }))
+            .plugin(tauri_plugin_autostart::init(
+                MacosLauncher::LaunchAgent,
+                Some(vec!["--minimized"]),
+            ))
             .plugin(tauri_plugin_dialog::init())
             .plugin(tauri_plugin_opener::init())
+            .plugin(tauri_plugin_shell::init())
     }
 
     pub fn generate_handlers()
@@ -118,7 +124,7 @@ mod app_init {
     pub fn setup_tray_icon_event(
         builder: TrayIconBuilder<tauri::Wry>,
     ) -> TrayIconBuilder<tauri::Wry> {
-        builder.on_tray_icon_event(|tray, event| match event {
+        builder.on_tray_icon_event(|_tray, event| match event {
             TrayIconEvent::Click {
                 button: MouseButton::Left,
                 button_state: MouseButtonState::Up,
@@ -131,6 +137,11 @@ mod app_init {
                     let _ = window.set_focus();
                 }
             }
+            TrayIconEvent::Move {
+                id: _,
+                position: _,
+                rect: _,
+            } => {}
             _ => {
                 logging!(debug, Type::Window, false, "Unhandled event {event:?}");
             }
@@ -206,9 +217,7 @@ pub fn run() {
     });
 
     let builder = app_init::setup_plugins(
-        tauri::Builder::default()
-            .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {}))
-            .plugin(tauri_plugin_shell::init()),
+        tauri::Builder::default().plugin(tauri_plugin_autostart::Builder::new().build()),
     )
     .invoke_handler(app_init::generate_handlers())
     .setup(|app| {
@@ -224,7 +233,7 @@ pub fn run() {
 
     app.run(|_app_handle, _event| {
         match _event {
-            tauri::RunEvent::ExitRequested { api, .. } => {
+            tauri::RunEvent::ExitRequested { api: _, .. } => {
                 // api.prevent_exit();
                 let time_stamp = Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
                 let params = params![&time_stamp, WindowEvent::EXITED];

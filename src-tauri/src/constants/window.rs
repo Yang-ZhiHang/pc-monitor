@@ -1,4 +1,4 @@
-pub const APP_NAME: &str = "PCMonitor";
+pub const APP_NAME: &str = "pc-monitor";
 
 pub struct WindowEvent;
 

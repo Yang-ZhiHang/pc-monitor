@@ -1,3 +1,4 @@
+use super::file::get_exe_path;
 use chrono::Local;
 use simplelog::*;
 use std::fs::File;
@@ -5,10 +6,15 @@ use std::{env, fmt};
 use time::macros::format_description;
 
 pub fn init_logger() -> Result<(), Box<dyn std::error::Error>> {
-    let log_file = File::create(format!(
-        "pc-monitor_{}.log",
-        Local::now().format("%Y-%m-%d_%H-%M-%S")
-    ))?;
+    let exe_path = get_exe_path()?;
+    let log_path = exe_path
+        .parent()
+        .ok_or("Failed to get exe parent dir")?
+        .join(format!(
+            "pc-monitor_{}.log",
+            Local::now().format("%Y-%m-%d_%H-%M-%S")
+        ));
+    let log_file = File::create(&log_path)?;
 
     let config = ConfigBuilder::new()
         .set_target_level(LevelFilter::Off)

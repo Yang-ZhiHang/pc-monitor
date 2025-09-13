@@ -1,3 +1,4 @@
+use super::file::get_exe_path;
 use crate::{
     constants::db::{DB_NAME, TABLE},
     singleton_with_logging,
@@ -24,8 +25,13 @@ impl DbManager {
 singleton_with_logging!(DbManager, DB_CONN);
 
 /// Initialize the database and create necessary tables.
-pub fn init_db() -> Result<Connection, rusqlite::Error> {
-    let conn = Connection::open(DB_NAME)?;
+pub fn init_db() -> Result<Connection, Box<dyn std::error::Error>> {
+    let exe_path = get_exe_path()?;
+    let db_path = exe_path
+        .parent()
+        .ok_or("Failed to get exe parent dir")?
+        .join(DB_NAME);
+    let conn = Connection::open(&db_path)?;
 
     let tables = [
         (
@@ -43,16 +49,18 @@ pub fn init_db() -> Result<Connection, rusqlite::Error> {
     ];
 
     for (table_name, columns) in tables {
-        conn.execute(
-            &format!(
-                "CREATE TABLE IF NOT EXISTS {} (
+        let _ = conn
+            .execute(
+                &format!(
+                    "CREATE TABLE IF NOT EXISTS {} (
                     id INTEGER PRIMARY KEY,
                     {}
                 )",
-                table_name, columns
-            ),
-            [],
-        )?;
+                    table_name, columns
+                ),
+                [],
+            )
+            .map_err(|e| <rusqlite::Error as Into<Box<dyn std::error::Error>>>::into(e));
     }
 
     Ok(conn)
