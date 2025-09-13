@@ -12,13 +12,12 @@ pub fn save_file_with_dialog(
     fmt: &str,
     default_name: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let app = AppHandleManager::global()
-        .get()
-        .expect("App not initialized");
+    let app = AppHandleManager::global().get().unwrap();
     let file_path = app
         .dialog()
         .file()
-        .add_filter(default_name, &[fmt])
+        .add_filter("", &[fmt.to_lowercase().as_str()])
+        .set_file_name(default_name)
         .blocking_save_file();
 
     match file_path {

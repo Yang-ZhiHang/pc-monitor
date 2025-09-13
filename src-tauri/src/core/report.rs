@@ -55,7 +55,7 @@ pub fn export_report(start_date: &str, end_date: &str, format: &str) -> Result<(
     if let Err(e) = save_file_with_dialog(
         content.as_str(),
         format,
-        format!("export_{}_to_{}", start_date, end_date).as_str(),
+        format!("report_{}_to_{}", start_date, end_date).as_str(),
     ) {
         return Err(e.to_string());
     }
