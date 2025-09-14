@@ -51,7 +51,7 @@ impl AppHandleManager {
                 debug,
                 Type::Setup,
                 "{} initialized with app handle.",
-                stringify!(Self)
+                std::any::type_name::<Self>()
             );
         }
     }
@@ -72,7 +72,7 @@ mod app_init {
     pub fn setup_plugins(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wry> {
         builder
             .plugin(tauri_plugin_single_instance::init(|_app, _argv, _cwd| {
-                logging!(debug, Type::Window, true, "Singleton instance activated");
+                logging!(debug, Type::Window, false, "Singleton instance activated");
                 if let Some(window) = WindowManager::get_main_window() {
                     let _ = window.unminimize();
                     let _ = window.show();
@@ -201,7 +201,7 @@ pub fn run() {
                 if pre_cw == cw {
                     return;
                 };
-                logging!(debug, Type::Window, "Current window: {}", cw);
+                logging!(debug, Type::Window, false, "Current window: {}", cw);
                 pre_cw = cw.clone();
                 if W_IGNORE_APP_LIST.contains(&cw.as_str()) {
                     return;
@@ -244,6 +244,7 @@ pub fn run() {
                 logging!(
                     info,
                     Type::Exit,
+                    false,
                     "App usage log inserted: [{} - {}]",
                     time_stamp,
                     WindowEvent::EXITED

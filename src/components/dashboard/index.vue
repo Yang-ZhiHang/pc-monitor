@@ -10,6 +10,7 @@ import BarChart from './chart/BarChart.vue';
 import CompareCard from './CompareCard.vue';
 import { getCurrentDate, getWeekDataAvg, getWeekDataSum } from '@/utils/date';
 import { format_seconds } from '@/utils/format';
+import { Mode } from '@/types/date';
 
 // register all components of Chart.js
 Chart.register(...registerables);
@@ -273,14 +274,14 @@ onUnmounted(() => {
     <!-- 概览卡片 -->
     <div class="grid grid-cols-3 gap-3 mb-3" v-if="appUsageReady && dailyUsageReady">
       <CompareCard :title="compareCardInfo[0].title" :formattedData="format_seconds(getWeekDataSum(dailyUsage!))"
-        :cmpData="[getWeekDataSum(dailyUsage!), getWeekDataSum(dailyUsage!, 1)]" :icon="compareCardInfo[0].icon"
+        :cmpData="[getWeekDataSum(dailyUsage!), getWeekDataSum(dailyUsage!, Mode.SUB, 1)]" :icon="compareCardInfo[0].icon"
         :bgColor="compareCardInfo[0].bgColor" :cmpText="compareCardInfo[0].cmpText" />
       <CompareCard :title="compareCardInfo[1].title"
         :formattedData="`${Object.keys(appUsage!).length} ${t('dashboard.cmp-card.1.unit')}`"
         :cmpData="[cmpCardData[1][0], cmpCardData[1][1]]" :icon="compareCardInfo[1].icon"
         :bgColor="compareCardInfo[1].bgColor" :cmpText="compareCardInfo[1].cmpText" />
       <CompareCard :title="compareCardInfo[2].title" :formattedData="format_seconds(getWeekDataAvg(dailyUsage!))"
-        :cmpData="[getWeekDataAvg(dailyUsage!), getWeekDataAvg(dailyUsage!, 1)]" :icon="compareCardInfo[2].icon"
+        :cmpData="[getWeekDataAvg(dailyUsage!), getWeekDataAvg(dailyUsage!, Mode.SUB, 1)]" :icon="compareCardInfo[2].icon"
         :bgColor="compareCardInfo[2].bgColor" :cmpText="compareCardInfo[2].cmpText" />
     </div>
 

@@ -12,7 +12,7 @@ export const periodText: Record<Period, string> = {
 };
 
 export const periodLabelKey: Record<Period, string[]> = {
-    [Period.WEEKLY]: ['week.mon', 'week.tue', 'week.wed', 'week.thu', 'week.fri', 'week.sat', 'week.sun'],
+    [Period.WEEKLY]: [ 'week.sun', 'week.mon', 'week.tue', 'week.wed', 'week.thu', 'week.fri', 'week.sat'],
     [Period.MONTHLY]: ['week.0', 'week.1', 'week.2', 'week.3', 'week.4'],
     [Period.YEARLY]: ['month.jan', 'month.feb', 'month.mar', 'month.apr', 'month.may', 'month.jun', 'month.jul', 'month.aug', 'month.sep', 'month.oct', 'month.nov', 'month.dec']
 };

@@ -158,7 +158,7 @@ pub fn window_close(hide: bool) {
             if hide {
                 match window.hide() {
                     Ok(_) => {
-                        logging!(info, Type::Window, true, "Window is now hidden.");
+                        logging!(info, Type::Window, false, "Window is now hidden.");
                     }
                     Err(e) => {
                         logging!(error, Type::Window, true, "Hide window failed: {}", e);
@@ -167,7 +167,7 @@ pub fn window_close(hide: bool) {
             } else {
                 match window.close() {
                     Ok(_) => {
-                        logging!(info, Type::Window, false, "Window closed.");
+                        logging!(debug, Type::Window, false, "Window closed.");
                     }
                     Err(e) => {
                         logging!(error, Type::Window, true, "Close window failed: {}", e);
@@ -177,7 +177,7 @@ pub fn window_close(hide: bool) {
         }
         None => {
             logging!(
-                info,
+                debug,
                 Type::Window,
                 true,
                 "Window does not exist, no need to close"
@@ -191,7 +191,7 @@ pub fn window_start_drag() -> bool {
     match WindowManager::get_main_window() {
         Some(window) => match window.start_dragging() {
             Ok(_) => {
-                logging!(info, Type::Window, false, "Window drag started.");
+                logging!(debug, Type::Window, false, "Window drag started.");
                 true
             }
             Err(e) => {
@@ -201,7 +201,7 @@ pub fn window_start_drag() -> bool {
         },
         None => {
             logging!(
-                info,
+                debug,
                 Type::Window,
                 true,
                 "Window does not exist, no need to start drag"

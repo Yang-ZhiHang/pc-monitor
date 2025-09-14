@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { periodLabelKey } from '@/constants/dashboard';
 import { Period } from '@/types/dashboard';
+import { Mode } from '@/types/date';
 
 // ===== week
 
@@ -9,15 +10,26 @@ import { Period } from '@/types/dashboard';
  * @param today
  * @returns [...'yyyy-mm-dd']
  */
-const getWeekDays = (sub: number = 0): string[] => {
+const getWeekDays = (mode: Mode = Mode.NOP, n: number = 0): string[] => {
     const today = dayjs();
     const weekDates: string[] = [];
     // Obtain the current day of the week (0=Sunday, 1=Monday,...6=Saturday)
-    const dayOfWeek = today.day();
+    // const dayOfWeek = today.day();
     // Calculate the start of the week (Monday)
-    const monday = today.subtract(dayOfWeek === 0 ? 6 : dayOfWeek - 1, 'day').subtract(sub, 'week');
+    // let monday = today.subtract(dayOfWeek === 0 ? 6 : dayOfWeek - 1, 'day');
+    let startOfWeek = today.startOf('week'); // Sunday
+    switch (mode) {
+        case Mode.SUB:
+            startOfWeek = startOfWeek.subtract(Math.abs(n), 'week');
+            break;
+        case Mode.INC:
+            startOfWeek = startOfWeek.add(Math.abs(n), 'week');
+            break;
+        default:
+            break;
+    }
     for (let i = 0; i < 7; i++) {
-        weekDates.push(monday.add(i, 'day').format('YYYY-MM-DD'));
+        weekDates.push(startOfWeek.add(i, 'day').format('YYYY-MM-DD'));
     }
     return weekDates;
 }
@@ -26,18 +38,18 @@ export const getWeekLabelKey = (): string[] => {
     return periodLabelKey[Period.WEEKLY];
 }
 
-export const getWeekData = (dataset: Record<string, number>, sub: number = 0): number[] => {
-    const weekDates = getWeekDays(sub);
+export const getWeekData = (dataset: Record<string, number>, mode: Mode = Mode.NOP, n: number = 0): number[] => {
+    const weekDates = getWeekDays(mode, n);
     return weekDates.map(date => dataset[date] || 0);
 }
 
-export const getWeekDataSum = (dataset: Record<string, number>, sub: number = 0): number => {
-    const weekDates = getWeekDays(sub);
+export const getWeekDataSum = (dataset: Record<string, number>, mode: Mode = Mode.NOP, n: number = 0): number => {
+    const weekDates = getWeekDays(mode, n);
     return weekDates.reduce((sum, date) => sum + (dataset[date] || 0), 0);
 }
 
-export const getWeekDataAvg = (dataset: Record<string, number>, sub: number = 0): number => {
-    const weekDates = getWeekDays(sub);
+export const getWeekDataAvg = (dataset: Record<string, number>, mode: Mode = Mode.NOP, n: number = 0): number => {
+    const weekDates = getWeekDays(mode, n);
     const today = dayjs().format('YYYY-MM-DD');
     // Only consider dates up to today
     const validDates = weekDates.filter(date => date <= today);
@@ -54,16 +66,18 @@ export const getWeekDataAvg = (dataset: Record<string, number>, sub: number = 0)
  * @returns [[...'yyyy-mm-dd'], [...'yyyy-mm-dd'], ...]
  */
 const getMonthWeekGroups = (): string[][] => {
-    const today = dayjs();
-    const daysInMonth = today.daysInMonth();
     const weeks: string[][] = [];
-    let week: string[] = [];
-    for (let i = 1; i <= daysInMonth; ++i) {
-        week.push(today.date(i).format('YYYY-MM-DD'));
-        if (week.length === 7 || i === daysInMonth) {
-            weeks.push(week);
-            week = [];
+    const today = dayjs();
+    const startOfMonth = today.startOf('month');
+    const endOfMonth = today.endOf('month');
+    let current = startOfMonth.startOf('week'); // Start from the first day of the week containing the 1st
+    while (current.isBefore(endOfMonth.endOf('week')) || current.isSame(endOfMonth.endOf('week'), 'day')) {
+        const week = [];
+        for (let i = 0; i < 7; i++) {
+            week.push(current.format('YYYY-MM-DD'));
+            current = current.add(1, 'day');
         }
+        weeks.push(week);
     }
     // Each element is an array of dates for that week
     return weeks;
@@ -75,6 +89,7 @@ export const getMonthWeekLabelKey = (): string[] => {
 
 export const getMonthWeekData = (dataset: Record<string, number>) => {
     const weeks = getMonthWeekGroups();
+    console.log('Month week groups:', weeks);
     return weeks.map(weekDates =>
         weekDates.reduce((sum, date) => sum + (dataset[date] || 0), 0)
     );
